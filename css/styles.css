@@ -266,3 +266,30 @@ body.guest .head .wrap{grid-template-columns:auto}
 .welcome-empty .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
 #migrateprog:empty{display:none}
 .pill.admin{background:var(--accent-soft);color:var(--accent);margin-left:6px}
+
+/* ---------- tek tıkla Favori / Sepet / Elimde ---------- */
+.qts{position:absolute;top:8px;right:8px;display:flex;flex-direction:column;gap:6px;z-index:2}
+.qt{width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.94);color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 1px 3px rgba(0,0,0,.08);transition:transform .12s ease,background .12s ease,color .12s ease}
+.qt:hover{transform:scale(1.06);color:var(--ink)}
+.qt .i{width:17px;height:17px}
+.qt.fav.on{background:var(--wish);border-color:var(--wish);color:#fff}
+.qt.fav.on .i{fill:currentColor}
+.qt.cart.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.qt.owned.on{background:var(--good);border-color:var(--good);color:#fff}
+.qts.big{position:static;flex-direction:row;flex-wrap:wrap;gap:8px}
+.qts.big .qt{width:auto;height:auto;border-radius:999px;padding:8px 14px;gap:7px;font-weight:700;font-size:.9rem;box-shadow:none;background:var(--paper);border-color:var(--line-strong);color:var(--ink)}
+.qts.big .qt:hover{transform:none;background:var(--bg)}
+.qts.big .qt.fav.on{background:var(--wish-soft);border-color:var(--wish);color:var(--wish)}
+.qts.big .qt.cart.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.qts.big .qt.owned.on{background:var(--good-soft);border-color:var(--good);color:var(--good)}
+@media (hover:none){.qt{width:38px;height:38px}}
+
+/* ---------- Elimdekiler: kategori başlıkları ---------- */
+.grp{margin-top:26px}
+.grp-h{display:flex;align-items:center;gap:8px;font-size:1.15rem;margin:0 0 14px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.grp-h a{text-decoration:none}
+.grp-h .muted{font-weight:600}
+.grp-h small{margin-left:auto;font-size:.8rem;color:var(--muted);font-weight:700}
+
+/* ---------- kategori şeridi: oluştur bağlantısı ---------- */
+.cat.add{color:var(--link)}

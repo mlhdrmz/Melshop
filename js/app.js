@@ -2,7 +2,7 @@
 import { store as localStore, shrinkImage, blobToDataURL, dataURLToBlob } from "./store.js";
 import { initCloud, auth, cloudStore, signupsOpen, setSignupsOpen, myProfile } from "./cloud.js";
 import {
-  DEFAULT_CATS, FIELD_DEFS, STATUS, LIST_TO_STATUS, LIST_TITLE, PRIORITY, PRIORITY_ORDER, AGAIN, SUBSCORES, HUE,
+  DEFAULT_CATS, FIELD_DEFS, STATUS, LIST_FLAG, LIST_TO_STATUS, LIST_TITLE, PRIORITY, PRIORITY_ORDER, AGAIN, SUBSCORES, HUE,
   PICKABLE_ICONS, ic, esc, num, tl, safeUrl, lower, uid, today, fmtDate, cimriUrl, lowest, slug
 } from "./data.js";
 
@@ -21,16 +21,27 @@ const byId = id => S.items.find(x => x.id === id);
 const catOf = id => S.cats.find(c => c.id === id) || { id, name: "Diğer", icon: "etiket" };
 const defsOf = catId => FIELD_DEFS[catId] || [];
 const groupDef = catId => defsOf(catId).find(d => d.group);
-const counts = list => ({ owned: list.filter(x => x.status === "owned").length, missing: list.filter(x => x.status === "missing").length, wish: list.filter(x => x.status === "wish").length });
+const inList = (x, st) => st === "none" ? !x.owned && !x.cart && !x.fav : !!x[LIST_FLAG[st]];
+const primaryOf = x => x.owned ? "owned" : x.cart ? "missing" : x.fav ? "wish" : "none";
+// Eski kayıtlarda tek "status" vardı; açılışta işaretlere çevrilir. "status" ekranda gösterilen ana durumdur.
+function normalize(x) {
+  if (x.owned === undefined && x.cart === undefined && x.fav === undefined) {
+    x.owned = x.status === "owned"; x.cart = x.status === "missing"; x.fav = x.status === "wish";
+  }
+  x.owned = !!x.owned; x.cart = !!x.cart; x.fav = !!x.fav;
+  x.status = primaryOf(x);
+  return x;
+}
+const counts = list => ({ owned: list.filter(x => x.owned).length, missing: list.filter(x => x.cart).length, wish: list.filter(x => x.fav).length, none: list.filter(x => inList(x, "none")).length });
 const covOf = list => { const c = counts(list); const t = c.owned + c.missing; return t ? Math.round(c.owned / t * 100) : 0; };
-const basketOf = list => list.filter(x => x.status === "missing").reduce((s, x) => s + (lowest(x)?.v || 0), 0);
+const basketOf = list => list.filter(x => x.cart).reduce((s, x) => s + (lowest(x)?.v || 0), 0);
 const scoreOf = x => typeof x.marketScore === "number" ? x.marketScore : typeof x.rating === "number" ? x.rating : -1;
 const hueOf = x => HUE[x.fields?.sub] ?? HUE[x.cat] ?? 200;
 const clone = o => JSON.parse(JSON.stringify(o));
 function sortItems(list, mode) {
   const a = [...list];
   const pri = x => PRIORITY_ORDER[x.priority] ?? 1;
-  const priceOf = x => x.status === "owned" ? (x.paid ?? Infinity) : (lowest(x)?.v ?? Infinity);
+  const priceOf = x => x.owned ? (x.paid ?? Infinity) : (lowest(x)?.v ?? Infinity);
   if (mode === "ad") a.sort((p, q) => p.name.localeCompare(q.name, "tr"));
   else if (mode === "fiyat") a.sort((p, q) => priceOf(p) - priceOf(q) || p.name.localeCompare(q.name, "tr"));
   else if (mode === "yeni") a.sort((p, q) => String(q.createdAt).localeCompare(String(p.createdAt)));
@@ -93,18 +104,32 @@ function toast(msg, actions = []) {
 
 /* ================= veri işlemleri ================= */
 async function saveItem(item, { silent } = {}) {
+  normalize(item);
   item.updatedAt = new Date().toISOString();
   await store.putItem(item);
   const i = S.items.findIndex(x => x.id === item.id);
   if (i >= 0) S.items[i] = item; else S.items.push(item);
   if (!silent) rerender();
 }
-async function moveStatus(id, to) {
-  const prev = byId(id); if (!prev || prev.status === to) return;
+const FLAG_TEXT = {
+  owned: ["Elimdekilere eklendi", "Elimdekilerden çıkarıldı"],
+  cart: ["Sepete eklendi", "Sepetten çıkarıldı"],
+  fav: ["Favorilere eklendi", "Favorilerden çıkarıldı"]
+};
+async function toggleFlag(id, flag) {
+  const prev = byId(id); if (!prev || !FLAG_TEXT[flag]) return;
   const next = clone(prev);
-  next.status = to;
-  if (to === "owned" && !next.boughtAt) next.boughtAt = today();
-  if (to === "missing" && prev.status === "owned") next.priority = "yuksek";
+  next[flag] = !prev[flag];
+  if (flag === "owned" && next.owned) { next.cart = false; if (!next.boughtAt) next.boughtAt = today(); }
+  await saveItem(next);
+  toast(`${next.name}: ${FLAG_TEXT[flag][next[flag] ? 0 : 1]}`, [{ label: "Geri al", run: () => saveItem(prev) }]);
+}
+async function moveStatus(id, to) {
+  const prev = byId(id); if (!prev) return;
+  const next = clone(prev);
+  if (to === "owned") { next.owned = true; next.cart = false; if (!next.boughtAt) next.boughtAt = today(); }
+  else if (to === "missing") { if (prev.owned) { next.owned = false; next.priority = "yuksek"; } next.cart = true; }
+  else if (to === "wish") next.fav = true;
   await saveItem(next);
   const acts = [{ label: "Geri al", run: () => saveItem(prev) }];
   if (to === "owned") acts.unshift({ label: "Fiyat ve puan ekle", run: () => go(`#/duzenle/${id}`) });
@@ -127,44 +152,52 @@ function renderChrome(activeCat) {
   $("#cnt-owned").textContent = c.owned;
   $("#cnt-wish").textContent = c.wish;
   $("#cnt-missing").textContent = c.missing;
+  // Boş kategoriler şeritte görünmez (Ayarlar'da ve ürün eklerken seçilebilir durur).
   $("#cats").innerHTML = S.cats.map(cat => {
     const n = S.items.filter(x => x.cat === cat.id).length;
+    if (!n && cat.id !== activeCat) return "";
     return `<a class="cat${cat.id === activeCat ? " on" : ""}" href="#/k/${esc(cat.id)}">${ic(cat.icon)}${esc(cat.name)}<small>${n}</small></a>`;
-  }).join("") + `<a class="cat" href="#/ayarlar" title="Kategori ekle">${ic("plus")}<span class="sr">Kategori ekle</span></a>`;
+  }).join("") + `<a class="cat add" href="#/ayarlar?yeni=kategori">${ic("plus")}Kategori oluştur</a>`;
 }
 
 /* ================= kart ================= */
 function card(x) {
-  const st = STATUS[x.status];
+  const st = STATUS[x.status] || STATUS.none;
   const lo = lowest(x);
   let score = "";
-  if (x.status === "owned") score = typeof x.marketScore === "number" ? `<span class="score">Piyasa ${x.marketScore}/10</span>` : typeof x.rating === "number" ? `<span class="score mine">Senin ${x.rating}/10</span>` : `<span class="score mine">Puanlanmadı</span>`;
+  if (x.owned) score = typeof x.marketScore === "number" ? `<span class="score">Piyasa ${x.marketScore}/10</span>` : typeof x.rating === "number" ? `<span class="score mine">Senin ${x.rating}/10</span>` : `<span class="score mine">Puanlanmadı</span>`;
   let body = "", acts = "";
-  if (x.status === "owned") {
+  if (x.owned) {
     if (x.paid != null) body = `<div class="price"><small>Ödediğin: ${tl(x.paid)}</small></div>`;
     acts = `<a class="btn sm" href="#/duzenle/${esc(x.id)}?b=puan">${typeof x.rating === "number" ? "Puanı düzenle" : "Puanla"}</a>` +
       (x.fields?.rebuy ? `<button type="button" class="link" data-act="rebuy" data-id="${esc(x.id)}">Bitti, yeniden al</button>` : "");
   } else {
     body = `<div class="price"><b>${lo ? tl(lo.v) : "Fiyat yok"}</b><small>${lo ? "En uygun: " + esc(lo.label) : "Henüz fiyat eklenmedi"}</small></div>`;
-    acts = `<button type="button" class="btn sm${x.status === "missing" ? " fill" : ""}" data-act="${x.status === "missing" ? "bought" : "tocart"}" data-id="${esc(x.id)}">${x.status === "missing" ? "Aldım" : "Sepete taşı"}</button>` +
+    acts = (x.cart ? `<button type="button" class="btn sm fill" data-act="bought" data-id="${esc(x.id)}">${ic("check")} Aldım</button>` : "") +
       `<a class="link" href="${esc(lo ? safeUrl(lo.url) : cimriUrl(x))}" target="_blank" rel="noopener">${lo ? "Karşılaştır" : "Cimri'de ara"} ${ic("out")}</a>`;
   }
   const brand = x.brand || x.fields?.sub || catOf(x.cat).name;
   return `<article class="card">
-    <a class="cover" href="#/u/${esc(x.id)}">${visual(x)}<span class="badge ${x.status}">${ic(st.icon)}${st.label}</span></a>
+    <a class="cover" href="#/u/${esc(x.id)}">${visual(x)}${x.status !== "none" ? `<span class="badge ${x.status}">${ic(st.icon)}${st.label}</span>` : ""}</a>
+    ${quickToggles(x)}
     <div class="meta"><span class="brand">${esc(brand)}</span>${score}</div>
     <h3 class="name"><a href="#/u/${esc(x.id)}">${esc(x.name)}</a></h3>${body}<div class="row">${acts}</div></article>`;
+}
+// Kartın köşesindeki tek tıkla ekle/çıkar düğmeleri (alışveriş sitelerindeki kalp gibi)
+function quickToggles(x, big = false) {
+  const b = (flag, icon, on, off) => `<button type="button" class="qt ${flag}${x[flag] ? " on" : ""}" data-act="toggle" data-flag="${flag}" data-id="${esc(x.id)}" aria-pressed="${!!x[flag]}" title="${x[flag] ? off : on}" aria-label="${esc(x.name)}: ${x[flag] ? off : on}">${ic(icon)}${big ? `<span>${x[flag] ? off : on}</span>` : ""}</button>`;
+  return `<div class="${big ? "qts big" : "qts"}">${b("fav", "heart", "Favorilere ekle", "Favorilerden çıkar")}${b("cart", "bag", "Sepete ekle", "Sepetten çıkar")}${b("owned", "box", "Elimde olarak işaretle", "Elimdekilerden çıkar")}</div>`;
 }
 const grid = list => list.length ? `<div class="grid">${list.map(card).join("")}</div>` : "";
 
 /* ================= ana sayfa ================= */
 async function viewHome() {
   const c = counts(S.items), cov = covOf(S.items), basket = basketOf(S.items);
-  const scored = S.items.filter(x => x.status === "owned" && typeof x.marketScore === "number").sort((a, b) => b.marketScore - a.marketScore);
+  const scored = S.items.filter(x => x.owned && typeof x.marketScore === "number").sort((a, b) => b.marketScore - a.marketScore);
   const top = scored[0];
-  const missing = sortItems(S.items.filter(x => x.status === "missing"), "oncelik");
-  const owned = sortItems(S.items.filter(x => x.status === "owned"), "puan");
-  const wish = sortItems(S.items.filter(x => x.status === "wish"), "oncelik");
+  const missing = sortItems(S.items.filter(x => x.cart), "oncelik");
+  const owned = sortItems(S.items.filter(x => x.owned), "puan");
+  const wish = sortItems(S.items.filter(x => x.fav), "oncelik");
   await loadPhotos([...missing.slice(0, 10), ...owned.slice(0, 10), ...wish.slice(0, 10), top].filter(Boolean).map(x => (x.photos || [])[0]));
   const avg = scored.length ? (scored.reduce((s, x) => s + x.marketScore, 0) / scored.length) : null;
   const days = S.lastBackup ? (Date.now() - new Date(S.lastBackup)) / 864e5 : Infinity;
@@ -185,8 +218,11 @@ async function viewHome() {
       ${localLeft
         ? `<p>Bu tarayıcıda daha önce eklediğin <b>${S.local.items} ürün</b>${S.local.photos ? ` ve <b>${S.local.photos} fotoğraf</b>` : ""} duruyor. Onları hesabına taşıyabilirsin.</p>
            <div class="btns"><a class="btn fill" href="#/ayarlar">${ic("upload")} Buluta taşı</a></div>`
-        : `<p>İlk ürününü ekleyebilir, hazır kişisel bakım listesiyle başlayabilir ya da bir yedekten yükleyebilirsin.</p>
-           <div class="btns"><a class="btn fill" href="#/ekle">${ic("plus")} Ürün ekle</a><button type="button" class="btn" data-act="starter">Hazır listeyi yükle (30 ürün)</button><a class="btn ghost" href="#/ayarlar">Yedekten yükle</a></div>`}
+        : S.isAdmin
+          ? `<p>İlk ürününü ekleyebilir, hazır kişisel bakım listesiyle başlayabilir ya da bir yedekten yükleyebilirsin.</p>
+           <div class="btns"><a class="btn fill" href="#/ekle">${ic("plus")} Ürün ekle</a><button type="button" class="btn" data-act="starter">Hazır listeyi yükle (30 ürün)</button><a class="btn ghost" href="#/ayarlar">Yedekten yükle</a></div>`
+          : `<p>Sahip olduğun eşyaları, almak istediklerini (Sepet) ve beğendiklerini (Favoriler) ekleyerek başla. Kategorilerini kendin oluşturabilirsin.</p>
+           <div class="btns"><a class="btn fill" href="#/ekle">${ic("plus")} Ürün ekle</a><a class="btn" href="#/ayarlar?yeni=kategori">${ic("plus")} Kategori oluştur</a><a class="btn ghost" href="#/ayarlar">Yedekten yükle</a></div>`}
     </section></div>`;
     return;
   }
@@ -225,7 +261,7 @@ function filterBar(list, q, { showCats = false, showStatus = true, catId = null 
   const d = q.get("d") || "all", s = q.get("s") || "puan", g = q.get("g") || "", k = q.get("k") || "";
   const c = counts(list);
   let chips = "";
-  if (showStatus) chips += `<div class="chips" role="group" aria-label="Durum">${[["all", "Tümü", list.length], ["owned", "Elimde", c.owned], ["missing", "Sepette", c.missing], ["wish", "Favori", c.wish]]
+  if (showStatus) chips += `<div class="chips" role="group" aria-label="Durum">${[["all", "Tümü", list.length], ["owned", "Elimde", c.owned], ["missing", "Sepette", c.missing], ["wish", "Favori", c.wish], ...(c.none ? [["none", "Listede değil", c.none]] : [])]
     .map(([v, l, n]) => `<button type="button" class="chip" data-q="d" data-v="${v}" aria-pressed="${d === v}">${l}<small>${n}</small></button>`).join("")}</div>`;
   const gd = catId && groupDef(catId);
   if (gd) {
@@ -243,7 +279,7 @@ function filterBar(list, q, { showCats = false, showStatus = true, catId = null 
 function applyFilters(list, q, catId) {
   const d = q.get("d") || "all", g = q.get("g") || "", k = q.get("k") || "";
   let out = list;
-  if (d !== "all") out = out.filter(x => x.status === d);
+  if (d !== "all") out = out.filter(x => inList(x, d));
   const gd = catId && groupDef(catId);
   if (gd && g) out = out.filter(x => x.fields?.[gd.key] === g);
   if (k) out = out.filter(x => x.cat === k);
@@ -274,15 +310,28 @@ async function viewCategory(id, q) {
 /* ================= listeler ve arama ================= */
 async function viewList(key, q) {
   const st = LIST_TO_STATUS[key]; if (!st) return viewNotFound();
-  const all = S.items.filter(x => x.status === st);
+  const all = S.items.filter(x => inList(x, st));
   const list = applyFilters(all, q, null);
   await loadPhotos(list.map(x => (x.photos || [])[0]));
   const basket = st === "missing" ? basketOf(list) : 0;
+  // Elimdekiler: kategori › alt kategori başlıkları altında
+  let body = grid(list);
+  if (st === "owned" && list.length) {
+    const groups = new Map();
+    for (const x of list) {
+      const cat = catOf(x.cat), sub = x.fields?.sub || "";
+      const key = cat.id + "|" + sub;
+      if (!groups.has(key)) groups.set(key, { cat, sub, items: [] });
+      groups.get(key).items.push(x);
+    }
+    const order = [...groups.values()].sort((a, b) => (S.cats.findIndex(c => c.id === a.cat.id) - S.cats.findIndex(c => c.id === b.cat.id)) || a.sub.localeCompare(b.sub, "tr"));
+    body = order.map(gr => `<section class="grp"><h2 class="grp-h">${ic(gr.cat.icon)}<a href="#/k/${esc(gr.cat.id)}">${esc(gr.cat.name)}</a>${gr.sub ? `<span class="muted">› ${esc(gr.sub)}</span>` : ""}<small>${gr.items.length}</small></h2>${grid(gr.items)}</section>`).join("");
+  }
   app().innerHTML = `<div class="wrap">
     <div class="page-h"><div><nav class="crumbs"><a href="#/">Ana sayfa</a> › <span>${LIST_TITLE[key]}</span></nav>
       <h1>${LIST_TITLE[key]}</h1><p>${all.length} ürün${st === "missing" && all.length ? ` · tahmini toplam ≈ ${tl(basket)}` : ""}</p></div>
-      <a class="btn fill" href="#/ekle?d=${st}">${ic("plus")} Ürün ekle</a></div>
-    ${all.length ? filterBar(all, q, { showCats: true, showStatus: false }) + grid(list) : `<div class="empty" style="margin-top:20px"><b>Liste boş</b><a class="btn fill" href="#/ekle?d=${st}">${ic("plus")} Ürün ekle</a></div>`}
+      <div style="display:flex;gap:10px;flex-wrap:wrap">${st === "owned" ? `<a class="btn" href="#/ayarlar?yeni=kategori">${ic("plus")} Kategori oluştur</a>` : ""}<a class="btn fill" href="#/ekle?d=${st}">${ic("plus")} Ürün ekle</a></div></div>
+    ${all.length ? filterBar(all, q, { showCats: true, showStatus: false }) + body : `<div class="empty" style="margin-top:20px"><b>Liste boş</b><a class="btn fill" href="#/ekle?d=${st}">${ic("plus")} Ürün ekle</a></div>`}
   </div>`;
 }
 async function viewSearch(term, q) {
@@ -303,15 +352,12 @@ async function viewSearch(term, q) {
 async function viewProduct(id) {
   const x = byId(id); if (!x) return viewNotFound("Ürün bulunamadı");
   await loadPhotos(x.photos || []);
-  const cat = catOf(x.cat), st = STATUS[x.status], lo = lowest(x), defs = defsOf(x.cat);
+  const cat = catOf(x.cat), lo = lowest(x), defs = defsOf(x.cat);
   const photos = (x.photos || []).filter(p => photoURL.has(p));
   const sub = x.fields?.sub;
   const consumable = x.fields?.rebuy || ["bakim", "kahve"].includes(x.cat);
-  const statusActs = x.status === "owned"
-    ? (consumable ? `<button type="button" class="btn" data-act="rebuy" data-id="${esc(x.id)}">${ic("refresh")} Bitti, yeniden al</button>` : "")
-    : x.status === "missing"
-      ? `<button type="button" class="btn fill" data-act="bought" data-id="${esc(x.id)}">${ic("check")} Aldım</button><button type="button" class="btn" data-act="towish" data-id="${esc(x.id)}">${ic("heart")} Favorilere taşı</button>`
-      : `<button type="button" class="btn fill" data-act="bought" data-id="${esc(x.id)}">${ic("check")} Aldım</button><button type="button" class="btn" data-act="tocart" data-id="${esc(x.id)}">${ic("bag")} Sepete taşı</button>`;
+  const statusActs = (x.cart ? `<button type="button" class="btn fill" data-act="bought" data-id="${esc(x.id)}">${ic("check")} Aldım</button>` : "")
+    + (x.owned && consumable && !x.cart ? `<button type="button" class="btn" data-act="rebuy" data-id="${esc(x.id)}">${ic("refresh")} Bitti, yeniden al</button>` : "");
   const fieldRows = defs.map(d => {
     const v = x.fields?.[d.key];
     if (d.type === "check") return `<dt>${esc(d.label)}</dt><dd>${v ? "Evet" : "Hayır"}</dd>`;
@@ -331,26 +377,27 @@ async function viewProduct(id) {
       </div>
       <div class="info">
         <div>
-          <div class="brandline"><span class="brandname">${esc(x.brand || cat.name)}</span><span class="pill ${x.status}">${ic(st.icon)}${st.label}</span>${x.status !== "owned" && x.priority === "yuksek" ? `<span class="pill pri">Öncelikli</span>` : ""}</div>
+          <div class="brandline"><span class="brandname">${esc(x.brand || cat.name)}</span>${["owned", "missing", "wish"].filter(k => inList(x, k)).map(k => `<span class="pill ${k}">${ic(STATUS[k].icon)}${STATUS[k].label}</span>`).join("")}${!x.owned && x.priority === "yuksek" ? `<span class="pill pri">Öncelikli</span>` : ""}</div>
           <h1>${esc(x.name)}</h1>
         </div>
+        ${quickToggles(x, true)}
         <div class="actions" id="pdacts">${statusActs}<a class="btn ghost" href="#/duzenle/${esc(x.id)}">${ic("edit")} Düzenle</a><button type="button" class="btn ghost" data-act="del-ask" data-id="${esc(x.id)}">${ic("trash")} Sil</button></div>
         <div id="delconfirm"></div>
-        ${x.status === "owned"
+        ${x.owned
           ? (x.paid != null || x.boughtAt ? `<div class="box"><h3>Satın alma</h3>${x.paid != null ? `<div class="bigprice">${tl(x.paid)}</div>` : ""}${x.boughtAt ? `<span class="muted">${fmtDate(x.boughtAt)} tarihinde alındı</span>` : ""}</div>` : "")
           : `<div class="box"><h3>En uygun fiyat</h3>${lo ? `<div class="bigprice">${tl(lo.v)}</div><span class="muted">${esc(lo.label)}${lo.hint ? " · " + esc(lo.hint) : ""}${x.offersCheckedAt ? ` · ${fmtDate(x.offersCheckedAt)}` : ""}</span>` : `<span class="muted">Henüz fiyat eklenmedi.</span>`}</div>`}
         <div class="box"><h3>Puanlar</h3>
           ${hasMarket ? `<div class="scorerow"><span style="min-width:110px;font-weight:700">Piyasa puanı</span>${meter(x.marketScore)}<b>${x.marketScore}/10</b></div>${x.marketWhy ? `<p class="why">${esc(x.marketWhy)}</p>` : ""}` : `<span class="muted">Piyasa puanı yok.${x.marketWhy ? " " + esc(x.marketWhy) : ""}</span>`}
           ${hasMine ? `<div class="scorerow" style="margin-top:6px"><span style="min-width:110px;font-weight:700">Senin puanın</span>${meter(x.rating, 10, "mine")}<b>${x.rating}/10</b></div>` : ""}
           ${SUBSCORES.some(([k]) => typeof x.scores?.[k] === "number") || x.again ? `<div class="subs">${SUBSCORES.filter(([k]) => typeof x.scores?.[k] === "number").map(([k, l]) => `<span>${l}</span>${dots(x.scores[k])}`).join("")}${x.again ? `<span>Tekrar alır mıyım?</span><b>${AGAIN[x.again]}</b>` : ""}</div>` : ""}
-          ${!hasMine && x.status === "owned" ? `<div><a class="btn sm" href="#/duzenle/${esc(x.id)}?b=puan">Puanla</a></div>` : ""}
+          ${!hasMine && x.owned ? `<div><a class="btn sm" href="#/duzenle/${esc(x.id)}?b=puan">Puanla</a></div>` : ""}
         </div>
         ${x.note ? `<div class="box"><h3>Not</h3><p style="margin:0;white-space:pre-wrap">${esc(x.note)}</p></div>` : ""}
         <div class="box"><h3>Fiyatlar ve linkler</h3>
           ${(x.offers || []).length ? `<ul class="offers">${x.offers.map(o => `<li><span style="min-width:0"><a href="${esc(safeUrl(o.url))}" target="_blank" rel="noopener">${esc(o.label || o.url)} ${ic("out")}</a>${o.hint ? `<small>${esc(o.hint)}</small>` : ""}</span><span class="p">${num(o.price) != null ? tl(num(o.price)) : esc(o.price || "")}</span></li>`).join("")}</ul>` : `<span class="muted">Kayıtlı link yok.</span>`}
           <div class="row"><a class="link" href="${esc(cimriUrl(x))}" target="_blank" rel="noopener">Cimri'de ara ${ic("out")}</a><a class="link" href="#/duzenle/${esc(x.id)}?b=fiyat">Linkleri düzenle</a></div>
         </div>
-        <div class="box"><h3>Bilgiler</h3><dl class="dl"><dt>Kategori</dt><dd><a href="#/k/${esc(cat.id)}">${esc(cat.name)}</a></dd>${fieldRows}${x.status !== "owned" ? `<dt>Öncelik</dt><dd>${PRIORITY[x.priority] || "Sonra"}</dd>` : ""}<dt>Eklendi</dt><dd>${fmtDate(x.createdAt)}</dd></dl></div>
+        <div class="box"><h3>Bilgiler</h3><dl class="dl"><dt>Kategori</dt><dd><a href="#/k/${esc(cat.id)}">${esc(cat.name)}</a></dd>${fieldRows}${!x.owned ? `<dt>Öncelik</dt><dd>${PRIORITY[x.priority] || "Sonra"}</dd>` : ""}<dt>Eklendi</dt><dd>${fmtDate(x.createdAt)}</dd></dl></div>
       </div>
     </div></div>`;
 }
@@ -364,7 +411,7 @@ async function viewForm(id, q) {
     if (id) { const x = byId(id); if (!x) return viewNotFound("Ürün bulunamadı"); draft = clone(x); }
     else {
       const k = q.get("k"); const d = q.get("d");
-      draft = { id: uid(), name: q.get("n") || "", brand: "", cat: S.cats.some(c => c.id === k) ? k : (S.cats[0]?.id || "bakim"), status: STATUS[d] ? d : "owned", priority: "orta",
+      draft = { id: uid(), name: q.get("n") || "", brand: "", cat: S.cats.some(c => c.id === k) ? k : (S.cats[0]?.id || "bakim"), owned: (d || "owned") === "owned", cart: d === "missing", fav: d === "wish", status: STATUS[d] ? d : "owned", priority: "orta",
         paid: null, boughtAt: "", note: "", marketScore: null, marketWhy: "", rating: null, scores: {}, again: null, offers: [], offersCheckedAt: "", fields: {}, photos: [], createdAt: "", updatedAt: "" };
     }
     draft.__for = id || "new:" + location.hash;
@@ -405,12 +452,12 @@ function renderForm(id) {
         <div class="two"><label class="fld"><span>Marka</span><input type="text" data-k="brand" value="${esc(x.brand)}" placeholder="ör. CeraVe"></label>
         <label class="fld"><span>Kategori</span><select data-k="cat" id="catsel">${S.cats.map(c => `<option value="${esc(c.id)}"${c.id === x.cat ? " selected" : ""}>${esc(c.name)}</option>`).join("")}</select></label></div>
         ${fieldHtml ? `<div class="two">${fieldHtml}</div>` : ""}
-        <div class="fld"><span>Durum</span><div class="seg words">${Object.entries(STATUS).map(([k, s]) => `<button type="button" data-seg="status" data-v="${k}" aria-pressed="${x.status === k}">${s.label}</button>`).join("")}</div></div>
-        ${x.status !== "owned" ? `<div class="fld"><span>Öncelik</span><div class="seg words">${Object.entries(PRIORITY).map(([k, l]) => `<button type="button" data-seg="priority" data-v="${k}" aria-pressed="${x.priority === k}">${l}</button>`).join("")}</div></div>` : ""}
+        <div class="fld"><span>Listeler <small class="muted">(birden fazlasını seçebilirsin)</small></span><div class="seg words">${[["owned", "Elimde"], ["cart", "Sepette"], ["fav", "Favori"]].map(([k, l]) => `<button type="button" data-seg="flag:${k}" aria-pressed="${!!x[k]}">${l}</button>`).join("")}</div></div>
+        ${!x.owned ? `<div class="fld"><span>Öncelik</span><div class="seg words">${Object.entries(PRIORITY).map(([k, l]) => `<button type="button" data-seg="priority" data-v="${k}" aria-pressed="${x.priority === k}">${l}</button>`).join("")}</div></div>` : ""}
         <label class="fld"><span>Not</span><textarea data-k="note" placeholder="Nasıl kullanıyorsun, nereden aldın…">${esc(x.note)}</textarea></label>
       </fieldset>
       <fieldset class="fs" id="fs-fiyat" style="border:1px solid var(--line)"><h3>Fiyat</h3>
-        ${x.status === "owned" ? `<div class="two"><label class="fld"><span>Ödediğin fiyat (TL)</span><input type="text" inputmode="decimal" data-k="paid" value="${x.paid ?? ""}" placeholder="ör. 450"></label><label class="fld"><span>Alış tarihi</span><input type="date" data-k="boughtAt" value="${esc(x.boughtAt)}"></label></div>` : ""}
+        ${x.owned ? `<div class="two"><label class="fld"><span>Ödediğin fiyat (TL)</span><input type="text" inputmode="decimal" data-k="paid" value="${x.paid ?? ""}" placeholder="ör. 450"></label><label class="fld"><span>Alış tarihi</span><input type="date" data-k="boughtAt" value="${esc(x.boughtAt)}"></label></div>` : ""}
         <div class="fld"><span>Fiyat linkleri</span><span class="muted" style="font-size:.88rem;font-weight:400">Mağaza ya da karşılaştırma sitesi linkleri. En düşük fiyat kartlarda gösterilir.</span></div>
         ${offerRows}
         <div class="row"><button type="button" class="btn sm" data-act="of-add">${ic("plus")} Link ekle</button><a class="link" id="cimrilink" href="${esc(cimriUrl(x))}" target="_blank" rel="noopener">Cimri'de ara ${ic("out")}</a></div>
@@ -471,7 +518,8 @@ async function saveForm() {
     const before = isNew ? undefined : byId(draft.id)?.catalogPhoto;
     if (draft.catalogPhoto !== before) { draft.catalogNote = ""; draft.catalogPage = ""; draft.catalogSource = ""; }
   }
-  if (draft.status === "owned") draft.priority = draft.priority || "orta";
+  normalize(draft);
+  if (draft.owned) draft.priority = draft.priority || "orta";
   for (const [pid, p] of pending) if (draft.photos.includes(pid)) { await store.putPhoto({ id: pid, itemId: draft.id, blob: p.blob }); photoURL.set(pid, p.url); }
   for (const pid of removed) { await store.deletePhoto(pid); const u = photoURL.get(pid); if (u) URL.revokeObjectURL(u); photoURL.delete(pid); }
   const item = clone({ ...draft, photos: draft.photos });
@@ -721,7 +769,10 @@ async function route() {
   else if (a === "u") await viewProduct(b);
   else if (a === "ekle") await viewForm(null, q);
   else if (a === "duzenle") await viewForm(b, q);
-  else if (a === "ayarlar") await viewSettings();
+  else if (a === "ayarlar") {
+    await viewSettings();
+    if (q.get("yeni") === "kategori") setTimeout(() => { document.getElementById("kategoriler")?.scrollIntoView({ block: "start" }); document.getElementById("newcat")?.focus(); }, 30);
+  }
   else viewNotFound();
   if (path !== lastPath) { window.scrollTo(0, 0); lastPath = path; }
   const t = { "": "Mel Shop", k: catOf(b).name, liste: LIST_TITLE[b], ara: "Arama", u: byId(b)?.name, ekle: "Yeni ürün", duzenle: "Düzenle", ayarlar: "Ayarlar" }[a || ""];
@@ -747,13 +798,15 @@ document.addEventListener("click", async e => {
     const key = el.dataset.seg, raw = el.dataset.v;
     const v = /^\d+$/.test(raw) ? +raw : raw;
     if (key.startsWith("sc:")) { const k = key.slice(3); draft.scores = draft.scores || {}; draft.scores[k] = draft.scores[k] === v ? null : v; }
-    else if (key === "status" || key === "priority") { draft[key] = v; renderForm(draft.__for.startsWith("new:") ? null : draft.id); return; }
+    else if (key.startsWith("flag:")) { const f = key.slice(5); draft[f] = !draft[f]; draft.status = primaryOf(draft); renderForm(draft.__for.startsWith("new:") ? null : draft.id); return; }
+    else if (key === "priority") { draft[key] = v; renderForm(draft.__for.startsWith("new:") ? null : draft.id); return; }
     else draft[key] = draft[key] === v ? null : v;
     el.parentElement.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b === el && (key.startsWith("sc:") ? draft.scores[key.slice(3)] : draft[key]) != null)));
     return;
   }
   const act = el.dataset.act, id = el.dataset.id;
-  if (act === "bought") moveStatus(id, "owned");
+  if (act === "toggle") toggleFlag(id, el.dataset.flag);
+  else if (act === "bought") moveStatus(id, "owned");
   else if (act === "tocart") moveStatus(id, "missing");
   else if (act === "towish") moveStatus(id, "wish");
   else if (act === "rebuy") moveStatus(id, "missing");
@@ -792,7 +845,7 @@ document.addEventListener("click", async e => {
     const icon = document.querySelector('[data-icon][aria-pressed="true"]')?.dataset.icon || "etiket";
     S.cats = [...S.cats, { id: cid, name, icon }];
     await store.setMeta("cats", S.cats);
-    toast(`${name} kategorisi eklendi`);
+    toast(`${name} kategorisi eklendi. İlk ürünü ekleyince üst şeritte görünür.`, [{ label: "Ürün ekle", run: () => go(`#/ekle?k=${cid}`) }]);
     rerender();
   }
   else if (act === "cat-del") {
@@ -833,7 +886,7 @@ window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); instal
 async function loadState() {
   let cats = await store.getMeta("cats");
   if (!cats) { cats = clone(DEFAULT_CATS); await store.setMeta("cats", cats); }
-  const items = await store.allItems();
+  const items = (await store.allItems()).map(normalize);
   await addCatalogPhotos(items);
   S.items = items; S.cats = cats;
   S.lastBackup = await store.getMeta("lastBackup");

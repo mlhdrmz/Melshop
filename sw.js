@@ -1,5 +1,5 @@
 // Mel Shop — çevrimdışı çalışma için önbellek
-const VERSION = "melshop-v4";
+const VERSION = "melshop-v5";
 const SHELL = [
   "./", "index.html", "css/styles.css", "js/app.js", "js/data.js", "js/store.js", "js/cloud.js",
   "data/seed.json", "fonts/SourceSans3-VF.woff2", "manifest.webmanifest",

@@ -43,8 +43,11 @@ export const FIELD_DEFS = {
 export const STATUS = {
   owned: { label: "Elimde", icon: "box", list: "elimde" },
   missing: { label: "Sepette", icon: "bag", list: "sepet" },
-  wish: { label: "Favori", icon: "heart", list: "favoriler" }
+  wish: { label: "Favori", icon: "heart", list: "favoriler" },
+  none: { label: "Listede değil", icon: "etiket", list: null }
 };
+// Her liste ayrı bir açık/kapalı işaret: ürün aynı anda hem elinde hem favoride olabilir.
+export const LIST_FLAG = { owned: "owned", missing: "cart", wish: "fav" };
 export const LIST_TO_STATUS = { elimde: "owned", sepet: "missing", favoriler: "wish" };
 export const LIST_TITLE = { elimde: "Elimdekiler", sepet: "Sepetindekiler", favoriler: "Favorilerin" };
 

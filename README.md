@@ -6,7 +6,8 @@ Sahip olduğun her şeyin kişisel vitrini. Alışveriş sitesi gibi görünür 
 
 - **Kategoriler:** Kişisel Bakım, Giyim & Ayakkabı, Elektronik, Kahve & Mutfak, Saat & Aksesuar, Oyun & Kontrolcü, Ev. Ayarlar'dan yenisi eklenebilir.
 - **Kategoriye özel alanlar:** Bakımda alt kategori ve "bitince yeniden al", giyimde beden ve renk, elektronikte model ve garanti bitişi, kahvede son kullanma tarihi, saatte referans no, oyunda platform, evde oda.
-- **Durumlar:** Elimde, Sepette, Favori. "Aldım", "Sepete taşı", "Bitti, yeniden al" ile ürünler listeler arasında geçer.
+- **Listeler:** Elimde, Sepette, Favori. Her ürünün kartındaki kalp, çanta ve kutu düğmeleriyle tek tıkla eklenir ya da çıkarılır; bir ürün aynı anda birden fazla listede olabilir. "Aldım" sepetten elimdekilere, "Bitti, yeniden al" elimdekilerden sepete taşır. Elimdekiler sayfası kategori ve alt kategoriye göre gruplanır.
+- **Kategori şeridi:** Yalnızca içinde ürün olan kategoriler görünür; "Kategori oluştur" ile yenisi eklenir.
 - **Puanlar:** Piyasa puanı (gerekçesiyle) ve senin puanın (etkisi, kullanım, fiyat/performans, tekrar alır mıyım).
 - **Fotoğraflar:** Ürün başına en fazla 4 fotoğraf; yüklerken otomatik küçültülür, şeffaf arka plan korunur. Kendi fotoğrafı olmayan ürünlerde mağazadaki ürün görseli (katalog fotoğrafı) gösterilir.
 - **Fiyatlar:** Mağaza linkleri, en düşük fiyat kartlarda görünür; "Cimri'de ara" ile güncel fiyat aranır.
