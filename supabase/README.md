@@ -7,6 +7,9 @@ Panelden yapılması gereken (kodla yapılamayan) ayar:
 - Authentication → URL Configuration → **Site URL**: `https://melshop-tau.vercel.app`
   (onay ve şifre yenileme e-postalarındaki bağlantılar siteye dönsün diye).
 
-Bekleyen iş: `public.is_admin()` fonksiyonu yalnızca güvenlik kurallarında kullanılıyor;
-API'den çağrılabilmesi zararsız (yalnızca çağıranın kendi admin durumunu döndürür) ama
-güvenlik danışmanı uyarı veriyor. `private` şemasına taşınacak.
+Uygulanan geçişler: `001_baslangic.sql`, `002_is_admin_private.sql`.
+
+Güvenlik testi (15.11.2026, iki sahte hesapla, sonunda geri alındı): kayıtlar kapalıyken
+yeni hesap reddediliyor; her hesap yalnızca kendi ürün, ayar ve fotoğrafını görüyor;
+başka hesabın ürününü güncelleyemiyor, silemiyor, onun adına ekleyemiyor; site ayarını
+yalnızca admin değiştirebiliyor; giriş yapmamış ziyaretçi hiçbir ürün ya da fotoğraf göremiyor.
