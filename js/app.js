@@ -54,12 +54,25 @@ async function loadPhotos(ids) {
     if (rec?.blob) photoURL.set(id, URL.createObjectURL(rec.blob));
   }));
 }
+const placeholder = (word, h) => `<div class="ph" style="--h:${h}"><span class="w">${esc(word)}</span><span class="cam">${ic("camera")}Fotoğraf yok</span></div>`;
+const hasCatalog = x => /^https:\/\//i.test(x.catalogPhoto || "");
 function visual(x, opts = {}) {
   const pid = (x.photos || [])[opts.index || 0];
   const u = pid && photoURL.get(pid);
   if (u) return `<img class="photo" src="${u}" alt="${esc(x.name)}" loading="lazy">`;
-  return `<div class="ph" style="--h:${hueOf(x)}"><span class="w">${esc(x.brand || x.name)}</span><span class="cam">${ic("camera")}Fotoğraf yok</span></div>`;
+  // Kendi fotoğrafı yoksa katalog fotoğrafı (ör. Cimri'deki ürün görseli); açılmazsa yer tutucuya döner.
+  if (!(x.photos || []).length && hasCatalog(x)) {
+    return `<img class="photo catalog" src="${esc(x.catalogPhoto)}" alt="${esc(x.catalogNote || x.name)}" loading="lazy" referrerpolicy="no-referrer" data-word="${esc(x.brand || x.name)}" data-h="${hueOf(x)}">`;
+  }
+  return placeholder(x.brand || x.name, hueOf(x));
 }
+// Katalog fotoğrafı yüklenemezse (bağlantı kırık, internet yok) yer tutucuyu göster.
+document.addEventListener("error", e => {
+  const t = e.target;
+  if (t instanceof HTMLImageElement && t.classList.contains("catalog")) {
+    t.outerHTML = placeholder(t.dataset.word || "", t.dataset.h || 200);
+  }
+}, true);
 function meter(v, max = 10, cls = "") { let h = ""; for (let i = 1; i <= max; i++) h += `<i class="${i <= v ? "f" : ""}"></i>`; return `<span class="meter ${cls}" aria-hidden="true">${h}</span>`; }
 function dots(v) { let h = ""; for (let i = 1; i <= 5; i++) h += `<i class="${i <= v ? "f" : ""}"></i>`; return `<span class="dots" aria-hidden="true">${h}</span>`; }
 
@@ -295,7 +308,8 @@ async function viewProduct(id) {
       <div class="gal">
         <div class="main" id="galmain">${visual(x)}</div>
         ${photos.length > 1 ? `<div class="thumbs">${photos.map((p, i) => `<button type="button" data-thumb="${i}" aria-pressed="${i === 0}" aria-label="${i + 1}. fotoğraf"><img src="${photoURL.get(p)}" alt=""></button>`).join("")}</div>` : ""}
-        ${photos.length ? "" : `<a class="link" href="#/duzenle/${esc(x.id)}">${ic("camera")} Fotoğraf ekle</a>`}
+        ${!photos.length && hasCatalog(x) ? `<p class="catnote">${x.status === "owned" ? "Katalog fotoğrafı" : "Görseldeki ürün"}: ${esc(x.catalogNote || x.name)}${x.catalogPage ? ` · <a href="${esc(safeUrl(x.catalogPage))}" target="_blank" rel="noopener">${esc(x.catalogSource || "kaynak")}</a>` : ""}. Kendi fotoğrafını eklersen o görünür.</p>` : ""}
+        ${photos.length ? "" : `<a class="link" href="#/duzenle/${esc(x.id)}">${ic("camera")} ${hasCatalog(x) ? "Kendi fotoğrafını ekle" : "Fotoğraf ekle"}</a>`}
       </div>
       <div class="info">
         <div>
@@ -365,7 +379,9 @@ function renderForm(id) {
   app().innerHTML = `<div class="wrap">
     <div class="page-h"><div><nav class="crumbs"><a href="#/">Ana sayfa</a> › <span>${id ? "Düzenle" : "Yeni ürün"}</span></nav><h1>${id ? esc(x.name || "Ürünü düzenle") : "Yeni ürün"}</h1></div></div>
     <form id="itemform" class="form" novalidate>
-      <fieldset class="fs wide" style="border:1px solid var(--line)"><h3>Fotoğraflar</h3><div class="photos">${pslots}</div><span class="muted" style="font-size:.88rem">En fazla 4 fotoğraf. İlk fotoğraf kapak olur; yüklerken otomatik küçültülür.</span></fieldset>
+      <fieldset class="fs wide" style="border:1px solid var(--line)"><h3>Fotoğraflar</h3><div class="photos">${pslots}</div><span class="muted" style="font-size:.88rem">En fazla 4 fotoğraf. İlk fotoğraf kapak olur; yüklerken otomatik küçültülür.</span>
+        <div class="catfield">${hasCatalog(x) ? `<img class="catprev" src="${esc(x.catalogPhoto)}" alt="" referrerpolicy="no-referrer">` : ""}<label class="fld"><span>Katalog fotoğrafı (bağlantı)</span><input type="url" data-k="catalogPhoto" value="${esc(x.catalogPhoto || "")}" placeholder="https://"></label></div>
+        <span class="muted" style="font-size:.88rem">Kendi fotoğrafın yokken bu görsel gösterilir. İnternetteki bir ürün görselinin bağlantısını yapıştırabilirsin; boş bırakırsan gösterilmez.</span></fieldset>
       <fieldset class="fs" style="border:1px solid var(--line)"><h3>Ürün</h3>
         <label class="fld"><span>Ürün adı <em>*</em></span><input type="text" data-k="name" value="${esc(x.name)}" required placeholder="ör. CeraVe Köpüren Temizleyici 236 ml"></label>
         <div class="two"><label class="fld"><span>Marka</span><input type="text" data-k="brand" value="${esc(x.brand)}" placeholder="ör. CeraVe"></label>
@@ -431,6 +447,12 @@ async function saveForm() {
   draft.offers = (draft.offers || []).filter(o => (o.label || o.url || o.price)).map(o => ({ label: (o.label || "").trim(), price: (o.price || "").trim(), url: (o.url || "").trim(), hint: o.hint || "" }));
   const bad = draft.offers.find(o => o.url && !/^https:\/\//i.test(o.url));
   if (bad) { $("#formerr").textContent = "Linkler https:// ile başlamalı."; return; }
+  if (typeof draft.catalogPhoto === "string") {
+    draft.catalogPhoto = draft.catalogPhoto.trim();
+    if (draft.catalogPhoto && !/^https:\/\//i.test(draft.catalogPhoto)) { $("#formerr").textContent = "Katalog fotoğrafı bağlantısı https:// ile başlamalı."; return; }
+    const before = isNew ? undefined : byId(draft.id)?.catalogPhoto;
+    if (draft.catalogPhoto !== before) { draft.catalogNote = ""; draft.catalogPage = ""; draft.catalogSource = ""; }
+  }
   if (draft.status === "owned") draft.priority = draft.priority || "orta";
   for (const [pid, p] of pending) if (draft.photos.includes(pid)) { await store.putPhoto({ id: pid, itemId: draft.id, blob: p.blob }); photoURL.set(pid, p.url); }
   for (const pid of removed) { await store.deletePhoto(pid); const u = photoURL.get(pid); if (u) URL.revokeObjectURL(u); photoURL.delete(pid); }
@@ -634,9 +656,28 @@ async function loadState() {
     } catch (e) { console.warn("Başlangıç verisi yüklenemedi", e); }
     await store.setMeta("seeded", true);
   }
+  await addCatalogPhotos(items);
   S.items = items; S.cats = cats;
   S.lastBackup = await store.getMeta("lastBackup");
   S.noticeHiddenAt = await store.getMeta("noticeHiddenAt");
+}
+// Başlangıç verisine sonradan eklenen katalog fotoğraflarını, tarayıcıda zaten kayıtlı ürünlere taşır.
+// Yalnızca bu alanı hiç olmayan ürünlere dokunur; kullanıcının değiştirdiği ya da kaldırdığı
+// (boş bıraktığı) bağlantıya ve kendi fotoğraflarına dokunmaz.
+const CATALOG_VERSION = 1;
+async function addCatalogPhotos(items) {
+  if ((await store.getMeta("catalogVersion")) >= CATALOG_VERSION) return;
+  try {
+    const seed = await (await fetch("data/seed.json", { cache: "no-store" })).json();
+    const fromSeed = new Map(seed.items.map(it => [it.id, it]));
+    for (const it of items) {
+      const s = fromSeed.get(it.id);
+      if (!s || !s.catalogPhoto || it.catalogPhoto !== undefined) continue;
+      Object.assign(it, { catalogPhoto: s.catalogPhoto, catalogNote: s.catalogNote || "", catalogPage: s.catalogPage || "", catalogSource: s.catalogSource || "" });
+      await store.putItem(it);
+    }
+    await store.setMeta("catalogVersion", CATALOG_VERSION);
+  } catch (e) { console.warn("Katalog fotoğrafları eklenemedi; sonraki açılışta yeniden denenecek", e); }
 }
 (async function boot() {
   try { await loadState(); }
