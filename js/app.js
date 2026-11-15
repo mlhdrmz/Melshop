@@ -1,11 +1,15 @@
 // Mel Shop — uygulama: yönlendirme, sayfalar, olaylar
-import { store, shrinkImage, blobToDataURL, dataURLToBlob } from "./store.js";
+import { store as localStore, shrinkImage, blobToDataURL, dataURLToBlob } from "./store.js";
+import { initCloud, auth, cloudStore, signupsOpen, setSignupsOpen, myProfile } from "./cloud.js";
 import {
   DEFAULT_CATS, FIELD_DEFS, STATUS, LIST_TO_STATUS, LIST_TITLE, PRIORITY, PRIORITY_ORDER, AGAIN, SUBSCORES, HUE,
   PICKABLE_ICONS, ic, esc, num, tl, safeUrl, lower, uid, today, fmtDate, cimriUrl, lowest, slug
 } from "./data.js";
 
-const S = { items: [], cats: [], lastBackup: null, noticeHiddenAt: null };
+const S = { items: [], cats: [], lastBackup: null, noticeHiddenAt: null, user: null, isAdmin: false, signupsOpen: null, local: null };
+// Giriş yapınca hesabın bulut deposuna geçer (cloud.js). Tarayıcıdaki eski veri (store.js) yalnızca taşıma için okunur.
+let store = localStore;
+let booted = false;
 const photoURL = new Map();
 const $ = sel => document.querySelector(sel);
 const app = () => $("#app");
@@ -166,14 +170,28 @@ async function viewHome() {
   const days = S.lastBackup ? (Date.now() - new Date(S.lastBackup)) / 864e5 : Infinity;
   const hid = S.noticeHiddenAt ? (Date.now() - new Date(S.noticeHiddenAt)) / 864e5 < 3 : false;
   const notice = S.items.length && days > 14 && !hid
-    ? `<div class="notice" role="status"><span>${S.lastBackup ? `Son yedeğin ${Math.floor(days)} gün önce alındı.` : "Henüz yedek almadın."} Veriler sadece bu tarayıcıda duruyor.</span><span style="display:flex;gap:10px;align-items:center"><a class="link" href="#/ayarlar">Yedek al</a><button type="button" class="x" data-act="hide-notice" aria-label="Uyarıyı kapat">${ic("close")}</button></span></div>` : "";
+    ? `<div class="notice" role="status"><span>${S.lastBackup ? `Son yedeğin ${Math.floor(days)} gün önce alındı.` : "Henüz yedek almadın."} Veriler hesabında saklanıyor; yine de ara sıra yedek almak iyi olur.</span><span style="display:flex;gap:10px;align-items:center"><a class="link" href="#/ayarlar">Yedek al</a><button type="button" class="x" data-act="hide-notice" aria-label="Uyarıyı kapat">${ic("close")}</button></span></div>` : "";
   const sec = (id, title, sub, list, extra = "", listKey) => `<section class="sec" id="${id}">
       <div class="sec-h"><div><h2>${title}</h2><p>${sub}</p></div>${extra}</div>
       ${list.length ? grid(list.slice(0, 10)) : `<div class="empty"><b>Burada henüz ürün yok</b><a class="btn" href="#/ekle?d=${LIST_TO_STATUS[listKey]}">${ic("plus")} Ürün ekle</a></div>`}
       ${list.length > 10 ? `<div class="more"><a class="btn" href="#/liste/${listKey}">Tümünü gör (${list.length})</a></div>` : ""}
     </section>`;
+  const localLeft = S.local && S.local.items > 0 && !S.local.migrated;
+  const migrateNotice = localLeft && S.items.length
+    ? `<div class="notice" role="status"><span>Bu tarayıcıda buluta taşınmamış ${S.local.items} ürün var.</span><a class="link" href="#/ayarlar">Buluta taşı</a></div>` : "";
+  if (!S.items.length) {
+    app().innerHTML = `<div class="wrap"><section class="welcome-empty">
+      <h1>Hesabında henüz ürün yok</h1>
+      ${localLeft
+        ? `<p>Bu tarayıcıda daha önce eklediğin <b>${S.local.items} ürün</b>${S.local.photos ? ` ve <b>${S.local.photos} fotoğraf</b>` : ""} duruyor. Onları hesabına taşıyabilirsin.</p>
+           <div class="btns"><a class="btn fill" href="#/ayarlar">${ic("upload")} Buluta taşı</a></div>`
+        : `<p>İlk ürününü ekleyebilir, hazır kişisel bakım listesiyle başlayabilir ya da bir yedekten yükleyebilirsin.</p>
+           <div class="btns"><a class="btn fill" href="#/ekle">${ic("plus")} Ürün ekle</a><button type="button" class="btn" data-act="starter">Hazır listeyi yükle (30 ürün)</button><a class="btn ghost" href="#/ayarlar">Yedekten yükle</a></div>`}
+    </section></div>`;
+    return;
+  }
   app().innerHTML = `<div class="wrap">
-    ${notice}
+    ${migrateNotice}${notice}
     <section class="hero">
       <div>
         <div class="eyebrow">Mel Shop · Koleksiyon</div>
@@ -467,14 +485,31 @@ async function saveForm() {
 
 /* ================= ayarlar ================= */
 async function viewSettings() {
-  let est = "";
-  try { const e = await navigator.storage?.estimate?.(); if (e?.usage != null) est = (e.usage / 1048576).toLocaleString("tr-TR", { maximumFractionDigits: 1 }) + " MB"; } catch (e) {}
   const nPhotos = S.items.reduce((s, x) => s + (x.photos || []).length, 0);
+  if (S.isAdmin && S.signupsOpen === null) S.signupsOpen = await signupsOpen();
+  const L = S.local;
+  const localBox = L && L.items > 0 ? `<section class="box" id="tasima"><h3>Bu tarayıcıdaki eski veriler</h3>
+        ${L.migrated
+          ? `<p>Bu tarayıcıdaki ${L.items} ürün ${fmtDate(L.migrated.at)} tarihinde hesabına taşındı. Eski kopya bu tarayıcıda yedek olarak duruyor; bir şey yapman gerekmiyor.</p>`
+          : `<p>Hesap açılmadan önce eklediğin <b>${L.items} ürün</b>${L.photos ? ` ve <b>${L.photos} fotoğraf</b>` : ""} bu tarayıcıda duruyor. Buluta taşıyınca her cihazdan görürsün. Taşımadan önce bir yedek almanı öneririm; bu tarayıcıdaki kopya silinmez.</p>
+             <div class="actions"><button type="button" class="btn" data-act="backup-local">${ic("download")} Önce yedek al</button><button type="button" class="btn fill" data-act="migrate">${ic("upload")} Buluta taşı</button></div>
+             <div id="migrateprog" class="muted" role="status"></div>`}
+      </section>` : "";
+  const adminBox = S.isAdmin ? `<section class="box"><h3>Yönetim</h3>
+        <p>Sen bu sitenin adminisin. Yeni hesap açılmasına izin verip vermeyeceğini buradan seçersin.</p>
+        <div class="kv"><span class="muted">Yeni hesap açılması</span><b>${S.signupsOpen ? "Açık" : "Kapalı"}</b></div>
+        <div><button type="button" class="btn" data-act="toggle-signups">${S.signupsOpen ? "Yeni hesapları kapat" : "Yeni hesaplara aç"}</button></div>
+      </section>` : "";
   app().innerHTML = `<div class="wrap">
     <div class="page-h"><div><nav class="crumbs"><a href="#/">Ana sayfa</a> › <span>Ayarlar</span></nav><h1>Ayarlar</h1></div></div>
     <div class="settings">
+      <section class="box"><h3>Hesap</h3>
+        <div class="kv"><span class="muted">Giriş yapılan hesap</span><b>${esc(S.user?.email || "")}${S.isAdmin ? ` <span class="pill admin">Admin</span>` : ""}</b></div>
+        <div><button type="button" class="btn" data-act="signout">Çıkış yap</button></div>
+      </section>
+      ${localBox}${adminBox}
       <section class="box"><h3>Yedek</h3>
-        <p>Tüm ürünler, puanlar ve fotoğraflar sadece bu tarayıcıda saklanıyor. Tarayıcı verilerini temizlersen silinirler; ara sıra yedek al.</p>
+        <p>Tüm ürünler, puanlar ve fotoğraflar hesabında (bulutta) saklanıyor. İstersen hepsini tek dosya olarak yedekleyebilir, sonra geri yükleyebilirsin.</p>
         <div class="kv"><span class="muted">Son yedek</span><b>${S.lastBackup ? fmtDate(S.lastBackup) : "Hiç alınmadı"}</b></div>
         <div class="kv"><span class="muted">İçerik</span><b>${S.items.length} ürün · ${nPhotos} fotoğraf</b></div>
         <div class="actions"><button type="button" class="btn fill" data-act="backup">${ic("download")} Yedek al</button>
@@ -489,22 +524,26 @@ async function viewSettings() {
         <span class="muted" style="font-size:.88rem">Kategori adlarını değiştirmek için kutuya yazman yeterli. İçinde ürün olan kategori silinemez; önce ürünleri başka kategoriye taşı.</span>
       </section>
       <section class="box"><h3>Uygulama</h3>
-        <p>Mel Shop'u bilgisayarına uygulama olarak kurabilirsin; internetsiz de açılır.</p>
+        <p>Mel Shop'u bilgisayarına uygulama olarak kurabilirsin.</p>
         ${installEvt ? `<div><button type="button" class="btn fill" data-act="install">${ic("download")} Uygulama olarak yükle</button></div>` : `<p style="font-size:.92rem">Yükle butonu görünmüyorsa: Chrome ya da Edge'de adres çubuğunun sağındaki yükle simgesine tıkla. Zaten yüklediysen bu buton çıkmaz.</p>`}
-        ${est ? `<div class="kv"><span class="muted">Kullanılan alan</span><b>${est}</b></div>` : ""}
       </section>
     </div></div>`;
 }
-async function doBackup() {
+async function doBackup(src = store) {
+  toast("Yedek hazırlanıyor…");
+  const isLocal = src === localStore;
+  const items = isLocal ? await localStore.allItems() : S.items;
+  const cats = isLocal ? (await localStore.getMeta("cats")) || DEFAULT_CATS : S.cats;
   const photos = [];
-  for (const p of await store.allPhotos()) photos.push({ id: p.id, itemId: p.itemId, data: await blobToDataURL(p.blob) });
-  const out = { app: "melshop", version: 1, exportedAt: new Date().toISOString(), cats: S.cats, items: S.items, photos };
+  for (const p of await src.allPhotos()) photos.push({ id: p.id, itemId: p.itemId, data: await blobToDataURL(p.blob) });
+  const out = { app: "melshop", version: 1, exportedAt: new Date().toISOString(), cats, items, photos };
   const blob = new Blob([JSON.stringify(out)], { type: "application/json" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = `melshop-yedek-${today()}.json`;
+  a.download = `melshop-yedek-${isLocal ? "tarayici-" : ""}${today()}.json`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  if (isLocal) { await localStore.setMeta("lastBackup", new Date().toISOString()); toast("Bu tarayıcıdaki verinin yedeği indirildi"); return; }
   S.lastBackup = new Date().toISOString();
   await store.setMeta("lastBackup", S.lastBackup);
   toast("Yedek dosyası indirildi");
@@ -516,7 +555,7 @@ async function readRestore(file) {
     const data = JSON.parse(await file.text());
     if (data.app !== "melshop" || !Array.isArray(data.items)) throw new Error();
     restoreData = data;
-    $("#restoreconfirm").innerHTML = `<div class="confirm"><span>Mevcut ${S.items.length} ürün silinip yedekteki ${data.items.length} ürün ve ${(data.photos || []).length} fotoğraf yüklenecek.</span><button type="button" class="btn sm danger fill" data-act="restore-yes">Evet, yükle</button><button type="button" class="btn sm" data-act="restore-no">Vazgeç</button></div>`;
+    $("#restoreconfirm").innerHTML = `<div class="confirm"><span>Hesabındaki mevcut ${S.items.length} ürün silinip yedekteki ${data.items.length} ürün ve ${(data.photos || []).length} fotoğraf yüklenecek.</span><button type="button" class="btn sm danger fill" data-act="restore-yes">Evet, yükle</button><button type="button" class="btn sm" data-act="restore-no">Vazgeç</button></div>`;
   } catch (e) { toast("Bu dosya bir Mel Shop yedeği değil"); }
 }
 async function doRestore() {
@@ -532,11 +571,143 @@ async function doRestore() {
   go("#/");
 }
 
+/* ================= eski veriyi buluta taşıma ================= */
+async function checkLocal() {
+  try {
+    const items = await localStore.allItems();
+    if (!items.length) return { items: 0, photos: 0, migrated: null };
+    const photos = items.reduce((s, x) => s + (x.photos || []).length, 0);
+    const migrated = await localStore.getMeta("migratedTo");
+    // Başka bir hesaba taşınmışsa bu hesaba bir daha önerme
+    if (migrated && migrated.uid !== S.user?.id) return { items: 0, photos: 0, migrated: null };
+    return { items: items.length, photos, migrated: migrated || null };
+  } catch (e) { return null; }
+}
+let migrating = false;
+async function migrateLocal() {
+  if (migrating) return;
+  migrating = true;
+  const prog = msg => { const el = $("#migrateprog"); if (el) el.textContent = msg; };
+  try {
+    const accountWasEmpty = S.items.length === 0;
+    const items = await localStore.allItems();
+    const photos = await localStore.allPhotos();
+    let done = 0;
+    for (const p of photos) { prog(`Fotoğraflar yükleniyor… ${++done}/${photos.length}`); await store.putPhoto({ id: p.id, blob: p.blob }); }
+    prog(`Ürünler kaydediliyor… (${items.length})`);
+    await store.putItems(items);
+    const localCats = (await localStore.getMeta("cats")) || [];
+    const cloudCats = (await store.getMeta("cats")) || [];
+    // Hesap boşsa kategoriler bu tarayıcıdaki haliyle (adları, sırası) taşınır; doluysa eksikler eklenir.
+    const merged = accountWasEmpty && localCats.length ? localCats : cloudCats.length ? [...cloudCats, ...localCats.filter(c => !cloudCats.some(x => x.id === c.id))] : (localCats.length ? localCats : clone(DEFAULT_CATS));
+    await store.setMeta("cats", merged);
+    const lb = await localStore.getMeta("lastBackup");
+    if (lb && !(await store.getMeta("lastBackup"))) await store.setMeta("lastBackup", lb);
+    const mark = { uid: S.user.id, at: new Date().toISOString() };
+    await localStore.setMeta("migratedTo", mark);
+    for (const u of photoURL.values()) URL.revokeObjectURL(u);
+    photoURL.clear();
+    await loadState();
+    S.local = await checkLocal();
+    toast(`${items.length} ürün ve ${photos.length} fotoğraf hesabına taşındı`);
+    go("#/");
+    rerender();
+  } catch (e) {
+    console.error(e);
+    prog("Taşıma yarıda kaldı: " + (e.message || e) + ". Tekrar deneyebilirsin; aynı ürünler iki kez eklenmez.");
+  } finally { migrating = false; }
+}
+async function loadStarter() {
+  try {
+    const seed = await (await fetch("data/seed.json", { cache: "no-store" })).json();
+    await store.putItems(seed.items);
+    if (!(await store.getMeta("cats"))) await store.setMeta("cats", clone(DEFAULT_CATS));
+    await loadState();
+    toast(`${seed.items.length} ürünlük hazır liste yüklendi`);
+    rerender();
+  } catch (e) { toast("Hazır liste yüklenemedi: " + (e.message || e)); }
+}
+
+/* ================= giriş ================= */
+const authMsg = e => {
+  const m = String(e?.message || e || "");
+  if (/Database error saving new user|signups_closed/i.test(m)) return "Yeni hesap açılması şu an kapalı.";
+  if (/Invalid login credentials/i.test(m)) return "E-posta ya da şifre hatalı.";
+  if (/Email not confirmed/i.test(m)) return "E-postanı henüz onaylamadın. Gelen kutundaki bağlantıya tıkla, sonra tekrar giriş yap.";
+  if (/already registered|already been registered/i.test(m)) return "Bu e-postayla zaten bir hesap var. Giriş yapmayı dene.";
+  if (/Password should be at least|weak/i.test(m)) return "Şifre en az 8 karakter olmalı.";
+  if (/rate limit|too many/i.test(m)) return "Çok fazla deneme oldu. Biraz bekleyip tekrar dene.";
+  if (/not authorized|sending/i.test(m)) return "Onay e-postası gönderilemedi. Hesap oluşturulmuş olabilir; biraz sonra giriş yapmayı dene.";
+  if (/fetch|network/i.test(m)) return "Bağlantı kurulamadı. İnternetini kontrol edip tekrar dene.";
+  return "Bir sorun oldu: " + m;
+};
+let authMode = "in";
+async function viewLogin(mode = authMode, note = "") {
+  authMode = mode;
+  document.body.classList.add("guest");
+  if (S.signupsOpen === null) S.signupsOpen = await signupsOpen().catch(() => false);
+  const titles = { in: "Giriş yap", up: "Hesap oluştur", reset: "Şifreni sıfırla", newpw: "Yeni şifre belirle" };
+  const tabs = S.signupsOpen && (mode === "in" || mode === "up")
+    ? `<div class="seg words auth-tabs" role="tablist"><button type="button" data-auth="in" aria-pressed="${mode === "in"}">Giriş yap</button><button type="button" data-auth="up" aria-pressed="${mode === "up"}">Hesap oluştur</button></div>` : "";
+  const email = mode === "newpw" ? "" : `<label class="fld"><span>E-posta</span><input type="email" id="au-email" autocomplete="email" required></label>`;
+  const pw = mode === "reset" ? "" : `<label class="fld"><span>${mode === "newpw" ? "Yeni şifre" : "Şifre"}</span><input type="password" id="au-pw" autocomplete="${mode === "in" ? "current-password" : "new-password"}" minlength="8" required></label>`;
+  app().innerHTML = `<div class="wrap"><section class="auth">
+    <h1>${titles[mode]}</h1>
+    <p class="muted">${mode === "up" ? "E-postan ve en az 8 karakterlik bir şifreyle hesabını oluştur." : mode === "reset" ? "E-postanı yaz; şifreni yenilemen için bir bağlantı gönderelim." : mode === "newpw" ? "Hesabın için yeni bir şifre yaz." : "Mel Shop'u kullanmak için hesabına giriş yap."}</p>
+    ${tabs}
+    <form id="authform" class="form-auth" novalidate>${email}${pw}
+      <button type="submit" class="btn fill">${titles[mode]}</button>
+      <p class="err" id="autherr" role="alert"></p>
+      <p class="ok" id="authok" role="status">${esc(note)}</p>
+    </form>
+    ${mode === "in" ? `<button type="button" class="link" data-auth="reset">Şifremi unuttum</button>` : mode === "reset" ? `<button type="button" class="link" data-auth="in">Girişe dön</button>` : ""}
+  </section></div>`;
+  document.title = "Giriş · Mel Shop";
+  document.getElementById(mode === "newpw" ? "au-pw" : "au-email")?.focus();
+}
+async function submitAuth() {
+  const err = $("#autherr"), ok = $("#authok"), btn = $("#authform button[type=submit]");
+  err.textContent = ""; ok.textContent = "";
+  const email = ($("#au-email")?.value || "").trim(), pw = $("#au-pw")?.value || "";
+  if (authMode !== "newpw" && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { err.textContent = "Geçerli bir e-posta yaz."; return; }
+  if (authMode !== "reset" && pw.length < 8) { err.textContent = "Şifre en az 8 karakter olmalı."; return; }
+  btn.disabled = true;
+  try {
+    if (authMode === "in") {
+      const { error } = await auth.signIn(email, pw);
+      if (error) throw error;
+      location.reload();
+    } else if (authMode === "up") {
+      const { data, error } = await auth.signUp(email, pw);
+      if (error) throw error;
+      S.signupsOpen = null;
+      if (data.session) { location.reload(); return; }
+      await viewLogin("in", "Hesabın oluşturuldu. E-postana gelen onay bağlantısına tıkla, sonra buradan giriş yap.");
+      $("#au-email").value = email;
+    } else if (authMode === "reset") {
+      const { error } = await auth.resetPassword(email);
+      if (error) throw error;
+      ok.textContent = "Şifre yenileme bağlantısı e-postana gönderildi.";
+    } else if (authMode === "newpw") {
+      const { error } = await auth.updatePassword(pw);
+      if (error) throw error;
+      location.replace(location.pathname + "#/");
+      location.reload();
+    }
+  } catch (e) { err.textContent = authMsg(e); }
+  finally { if (btn.isConnected) btn.disabled = false; }
+}
+function viewNoConnection(e) {
+  console.error(e);
+  app().innerHTML = `<div class="wrap"><div class="empty" style="margin-top:40px"><b>Mel Shop'a bağlanılamadı</b>İnternet bağlantını kontrol edip tekrar dene.<br><button type="button" class="btn" onclick="location.reload()">Tekrar dene</button></div></div>`;
+}
+
 /* ================= yönlendirme ================= */
 function viewNotFound(msg = "Sayfa bulunamadı") {
   app().innerHTML = `<div class="wrap"><div class="empty" style="margin-top:40px"><b>${esc(msg)}</b><a class="btn" href="#/">Ana sayfaya dön</a></div></div>`;
 }
 async function route() {
+  if (!S.user) { if (booted) await viewLogin(); return; }
   const { parts, q, path } = parseHash();
   const [a, b] = parts;
   let activeCat = a === "k" ? b : a === "u" ? byId(b)?.cat : null;
@@ -560,6 +731,8 @@ function rerender() { route(); }
 
 /* ================= olaylar ================= */
 document.addEventListener("click", async e => {
+  const au = e.target.closest("[data-auth]");
+  if (au && !S.user) { viewLogin(au.dataset.auth); return; }
   const el = e.target.closest("[data-act],[data-q],[data-seg],[data-thumb],[data-icon]");
   if (!el) return;
   if (el.dataset.q) { setQuery({ [el.dataset.q]: el.dataset.v === "all" ? "" : el.dataset.v }); return; }
@@ -600,6 +773,15 @@ document.addEventListener("click", async e => {
   else if (act === "form-save") saveForm();
   else if (act === "form-cancel") { for (const p of pending.values()) URL.revokeObjectURL(p.url); draft = null; pending = new Map(); removed = new Set(); }
   else if (act === "backup") doBackup();
+  else if (act === "backup-local") doBackup(localStore);
+  else if (act === "migrate") migrateLocal();
+  else if (act === "starter") { el.disabled = true; loadStarter(); }
+  else if (act === "signout") { await auth.signOut(); location.replace(location.pathname + "#/"); location.reload(); }
+  else if (act === "toggle-signups") {
+    try { S.signupsOpen = await setSignupsOpen(!S.signupsOpen); toast(S.signupsOpen ? "Yeni hesaplara açıldı" : "Yeni hesaplar kapatıldı"); }
+    catch (e) { toast(e.message || "Ayar değiştirilemedi"); }
+    rerender();
+  }
   else if (act === "restore-yes") doRestore();
   else if (act === "restore-no") { restoreData = null; $("#restoreconfirm").innerHTML = ""; }
   else if (act === "install" && installEvt) { installEvt.prompt(); await installEvt.userChoice.catch(() => null); installEvt = null; rerender(); }
@@ -638,6 +820,11 @@ document.addEventListener("change", async e => {
     toast("Kategori adı güncellendi");
   }
 });
+document.addEventListener("submit", e => { if (e.target.id === "authform") { e.preventDefault(); submitAuth(); } });
+window.addEventListener("unhandledrejection", e => {
+  const m = e.reason?.message || String(e.reason || "");
+  if (S.user && m) toast("İşlem tamamlanamadı: " + m);
+});
 $("#searchform").addEventListener("submit", e => { e.preventDefault(); const v = $("#q").value.trim(); if (v) go("#/ara/" + encodeURIComponent(v)); });
 window.addEventListener("hashchange", route);
 window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); installEvt = e; if (parseHash().parts[0] === "ayarlar") rerender(); });
@@ -646,16 +833,7 @@ window.addEventListener("beforeinstallprompt", e => { e.preventDefault(); instal
 async function loadState() {
   let cats = await store.getMeta("cats");
   if (!cats) { cats = clone(DEFAULT_CATS); await store.setMeta("cats", cats); }
-  let items = await store.allItems();
-  const seeded = await store.getMeta("seeded");
-  if (!seeded && !items.length) {
-    try {
-      const seed = await (await fetch("data/seed.json", { cache: "no-store" })).json();
-      for (const it of seed.items) await store.putItem(it);
-      items = seed.items;
-    } catch (e) { console.warn("Başlangıç verisi yüklenemedi", e); }
-    await store.setMeta("seeded", true);
-  }
+  const items = await store.allItems();
   await addCatalogPhotos(items);
   S.items = items; S.cats = cats;
   S.lastBackup = await store.getMeta("lastBackup");
@@ -666,7 +844,7 @@ async function loadState() {
 // (boş bıraktığı) bağlantıya ve kendi fotoğraflarına dokunmaz.
 const CATALOG_VERSION = 1;
 async function addCatalogPhotos(items) {
-  if ((await store.getMeta("catalogVersion")) >= CATALOG_VERSION) return;
+  if (!items.length || (await store.getMeta("catalogVersion")) >= CATALOG_VERSION) return;
   try {
     const seed = await (await fetch("data/seed.json", { cache: "no-store" })).json();
     const fromSeed = new Map(seed.items.map(it => [it.id, it]));
@@ -680,8 +858,23 @@ async function addCatalogPhotos(items) {
   } catch (e) { console.warn("Katalog fotoğrafları eklenemedi; sonraki açılışta yeniden denenecek", e); }
 }
 (async function boot() {
-  try { await loadState(); }
-  catch (e) { app().innerHTML = `<div class="wrap"><div class="empty" style="margin-top:40px"><b>Veriler açılamadı</b>Tarayıcın verileri saklamaya izin vermiyor olabilir (gizli pencere gibi). Normal bir pencerede dene.</div></div>`; return; }
+  try { await initCloud(); } catch (e) { viewNoConnection(e); return; }
+  auth.onChange((event, session) => {
+    if (!booted) return;
+    if (event === "PASSWORD_RECOVERY") { S.user = null; viewLogin("newpw"); return; }
+    if (event === "SIGNED_IN" && session && !S.user && authMode !== "newpw") location.reload();
+    if (event === "SIGNED_OUT" && S.user) { location.replace(location.pathname + "#/"); location.reload(); }
+  });
+  let session = null;
+  try { session = await auth.session(); } catch (e) { viewNoConnection(e); return; }
+  booted = true;
+  if (!session || /type=recovery/.test(location.hash)) { await viewLogin(/type=recovery/.test(location.hash) ? "newpw" : "in"); return; }
+  S.user = session.user;
+  store = cloudStore(session.user.id);
+  document.body.classList.remove("guest");
+  try { await loadState(); } catch (e) { viewNoConnection(e); return; }
+  S.isAdmin = (await myProfile()).is_admin === true;
+  S.local = await checkLocal();
   await route();
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(() => {});
 })();

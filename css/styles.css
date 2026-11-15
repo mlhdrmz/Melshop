@@ -245,3 +245,24 @@ footer{border-top:1px solid var(--line);padding-block:22px;color:var(--muted);fo
 footer .wrap{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
 footer a{color:var(--link)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* ---------- giriş ve hesap ---------- */
+body.guest .search,body.guest .acts,body.guest .cats,body.guest footer a{display:none}
+body.guest .head .wrap{grid-template-columns:auto}
+.auth{max-width:420px;margin:56px auto 72px;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:28px 26px;display:flex;flex-direction:column;gap:14px}
+.auth h1{margin:0;font-size:1.9rem;line-height:1.1}
+.auth p{margin:0}
+.auth-tabs{align-self:flex-start}
+.form-auth{display:flex;flex-direction:column;gap:12px}
+.form-auth .fld input{border:1px solid var(--line-strong);background:#fff;border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+.form-auth .btn{align-self:flex-start}
+.form-auth .err{color:var(--wish);font-weight:600;min-height:0}
+.form-auth .ok{color:var(--good);font-weight:600;min-height:0}
+.form-auth .err:empty,.form-auth .ok:empty{display:none}
+.auth .link{align-self:flex-start}
+.welcome-empty{max-width:640px;margin:56px auto 72px;text-align:center;display:flex;flex-direction:column;gap:14px;align-items:center}
+.welcome-empty h1{margin:0;font-size:2rem}
+.welcome-empty p{margin:0;color:var(--muted)}
+.welcome-empty .btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+#migrateprog:empty{display:none}
+.pill.admin{background:var(--accent-soft);color:var(--accent);margin-left:6px}

@@ -1,7 +1,7 @@
 // Mel Shop — çevrimdışı çalışma için önbellek
-const VERSION = "melshop-v3";
+const VERSION = "melshop-v4";
 const SHELL = [
-  "./", "index.html", "css/styles.css", "js/app.js", "js/data.js", "js/store.js",
+  "./", "index.html", "css/styles.css", "js/app.js", "js/data.js", "js/store.js", "js/cloud.js",
   "data/seed.json", "fonts/SourceSans3-VF.woff2", "manifest.webmanifest",
   "icons/favicon.svg", "icons/icon-32.png", "icons/icon-192.png", "icons/icon-512.png", "icons/apple-touch-icon.png"
 ];

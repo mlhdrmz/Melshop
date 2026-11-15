@@ -8,16 +8,22 @@ Sahip olduğun her şeyin kişisel vitrini. Alışveriş sitesi gibi görünür 
 - **Kategoriye özel alanlar:** Bakımda alt kategori ve "bitince yeniden al", giyimde beden ve renk, elektronikte model ve garanti bitişi, kahvede son kullanma tarihi, saatte referans no, oyunda platform, evde oda.
 - **Durumlar:** Elimde, Sepette, Favori. "Aldım", "Sepete taşı", "Bitti, yeniden al" ile ürünler listeler arasında geçer.
 - **Puanlar:** Piyasa puanı (gerekçesiyle) ve senin puanın (etkisi, kullanım, fiyat/performans, tekrar alır mıyım).
-- **Fotoğraflar:** Ürün başına en fazla 4 fotoğraf; yüklerken otomatik küçültülür.
+- **Fotoğraflar:** Ürün başına en fazla 4 fotoğraf; yüklerken otomatik küçültülür, şeffaf arka plan korunur. Kendi fotoğrafı olmayan ürünlerde mağazadaki ürün görseli (katalog fotoğrafı) gösterilir.
 - **Fiyatlar:** Mağaza linkleri, en düşük fiyat kartlarda görünür; "Cimri'de ara" ile güncel fiyat aranır.
 - **Yedek:** Ayarlar'dan tek dosya olarak yedek al / yedekten yükle (fotoğraflar dahil).
-- **Uygulama olarak kurulur** ve internetsiz de açılır.
+- **Hesaplar:** E-posta ve şifreyle giriş; veriler bulutta, her cihazdan aynı.
+- **Uygulama olarak kurulur.**
 
-## Veriler nerede?
+## Hesaplar ve veriler
 
-Tüm veriler tarayıcının kendi veritabanında (IndexedDB) saklanır; hiçbir sunucuya gitmez. Tarayıcı verileri temizlenirse silinir, bu yüzden düzenli yedek alınmalı.
+- Site Supabase'e bağlıdır (proje: `melshop`, Frankfurt). Giriş e-posta ve şifreyle yapılır; giriş yapmayan ziyaretçi yalnızca giriş sayfasını görür.
+- Her hesabın ürünleri (`items`), ayarları (`user_meta`) ve fotoğrafları (`photos` deposu, `<hesap id>/` klasörü) ayrıdır. Satır düzeyi güvenlik kuralları sayesinde kimse başka bir hesabın verisini göremez ya da değiştiremez.
+- İlk açılan hesap admin olur ve yeni kayıtlar kendiliğinden kapanır. Admin, Ayarlar → Yönetim'den yeni hesapları açıp kapatabilir.
+- Hesaplardan önce tarayıcıda (IndexedDB) tutulan veriler silinmez; Ayarlar → "Bu tarayıcıdaki eski veriler" bölümünden tek seferde buluta taşınır.
+- `js/cloud.js` içindeki adres ve anahtar tarayıcıda kullanılmak içindir (herkese açık "publishable" anahtar); gizli anahtar sitede yoktur.
+- Ücretsiz planda Supabase, bir hafta hiç kullanılmayan projeyi duraklatır; panelden tek tıkla geri açılır, veri kaybolmaz.
 
-İlk açılışta `data/seed.json` içindeki başlangıç verisi (Bakım Dolabı'ndan taşınan 30 ürün) yüklenir.
+Başlangıç listesi (`data/seed.json`, Bakım Dolabı'ndan gelen 30 ürün) boş bir hesapta "Hazır listeyi yükle" ile yüklenir.
 
 ## Yapı
 
@@ -26,7 +32,8 @@ index.html            Sayfa iskeleti ve üst bant
 css/styles.css        Tasarım (Mavi · saf tema, Source Sans 3)
 js/app.js             Sayfalar, yönlendirme, olaylar
 js/data.js            Kategoriler, özel alanlar, simgeler, yardımcılar
-js/store.js           IndexedDB, fotoğraf küçültme
+js/cloud.js           Supabase: giriş, ürünler, ayarlar, fotoğraflar
+js/store.js           Tarayıcıdaki eski veri (IndexedDB), fotoğraf küçültme
 data/seed.json        Başlangıç verisi
 sw.js                 Çevrimdışı önbellek
 manifest.webmanifest  Uygulama bilgileri
