@@ -24,7 +24,7 @@ Sahip olduğun her şeyin kişisel vitrini. Alışveriş sitesi gibi görünür 
 - `js/cloud.js` içindeki adres ve anahtar tarayıcıda kullanılmak içindir (herkese açık "publishable" anahtar); gizli anahtar sitede yoktur.
 - Ücretsiz planda Supabase, bir hafta hiç kullanılmayan projeyi duraklatır; panelden tek tıkla geri açılır, veri kaybolmaz.
 
-Başlangıç listesi (`data/seed.json`, Bakım Dolabı'ndan gelen 30 ürün) boş bir hesapta "Hazır listeyi yükle" ile yüklenir.
+Sitede hazır ürün listesi yoktur; her hesap kendi ürünlerini ekler. Kişisel listeler yalnızca sahibinin hesabında durur.
 
 ## Yapı
 
@@ -35,7 +35,6 @@ js/app.js             Sayfalar, yönlendirme, olaylar
 js/data.js            Kategoriler, özel alanlar, simgeler, yardımcılar
 js/cloud.js           Supabase: giriş, ürünler, ayarlar, fotoğraflar
 js/store.js           Tarayıcıdaki eski veri (IndexedDB), fotoğraf küçültme
-data/seed.json        Başlangıç verisi
 sw.js                 Çevrimdışı önbellek
 manifest.webmanifest  Uygulama bilgileri
 fonts/                Source Sans 3 (SIL Open Font License)

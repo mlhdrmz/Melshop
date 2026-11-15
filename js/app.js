@@ -218,10 +218,7 @@ async function viewHome() {
       ${localLeft
         ? `<p>Bu tarayıcıda daha önce eklediğin <b>${S.local.items} ürün</b>${S.local.photos ? ` ve <b>${S.local.photos} fotoğraf</b>` : ""} duruyor. Onları hesabına taşıyabilirsin.</p>
            <div class="btns"><a class="btn fill" href="#/ayarlar">${ic("upload")} Buluta taşı</a></div>`
-        : S.isAdmin
-          ? `<p>İlk ürününü ekleyebilir, hazır kişisel bakım listesiyle başlayabilir ya da bir yedekten yükleyebilirsin.</p>
-           <div class="btns"><a class="btn fill" href="#/ekle">${ic("plus")} Ürün ekle</a><button type="button" class="btn" data-act="starter">Hazır listeyi yükle (30 ürün)</button><a class="btn ghost" href="#/ayarlar">Yedekten yükle</a></div>`
-          : `<p>Sahip olduğun eşyaları, almak istediklerini (Sepet) ve beğendiklerini (Favoriler) ekleyerek başla. Kategorilerini kendin oluşturabilirsin.</p>
+        : `<p>Sahip olduğun eşyaları, almak istediklerini (Sepet) ve beğendiklerini (Favoriler) ekleyerek başla. Kategorilerini kendin oluşturabilirsin.</p>
            <div class="btns"><a class="btn fill" href="#/ekle">${ic("plus")} Ürün ekle</a><a class="btn" href="#/ayarlar?yeni=kategori">${ic("plus")} Kategori oluştur</a><a class="btn ghost" href="#/ayarlar">Yedekten yükle</a></div>`}
     </section></div>`;
     return;
@@ -665,16 +662,6 @@ async function migrateLocal() {
     prog("Taşıma yarıda kaldı: " + (e.message || e) + ". Tekrar deneyebilirsin; aynı ürünler iki kez eklenmez.");
   } finally { migrating = false; }
 }
-async function loadStarter() {
-  try {
-    const seed = await (await fetch("data/seed.json", { cache: "no-store" })).json();
-    await store.putItems(seed.items);
-    if (!(await store.getMeta("cats"))) await store.setMeta("cats", clone(DEFAULT_CATS));
-    await loadState();
-    toast(`${seed.items.length} ürünlük hazır liste yüklendi`);
-    rerender();
-  } catch (e) { toast("Hazır liste yüklenemedi: " + (e.message || e)); }
-}
 
 /* ================= giriş ================= */
 const authMsg = e => {
@@ -828,7 +815,6 @@ document.addEventListener("click", async e => {
   else if (act === "backup") doBackup();
   else if (act === "backup-local") doBackup(localStore);
   else if (act === "migrate") migrateLocal();
-  else if (act === "starter") { el.disabled = true; loadStarter(); }
   else if (act === "signout") { await auth.signOut(); location.replace(location.pathname + "#/"); location.reload(); }
   else if (act === "toggle-signups") {
     try { S.signupsOpen = await setSignupsOpen(!S.signupsOpen); toast(S.signupsOpen ? "Yeni hesaplara açıldı" : "Yeni hesaplar kapatıldı"); }
@@ -887,28 +873,9 @@ async function loadState() {
   let cats = await store.getMeta("cats");
   if (!cats) { cats = clone(DEFAULT_CATS); await store.setMeta("cats", cats); }
   const items = (await store.allItems()).map(normalize);
-  await addCatalogPhotos(items);
   S.items = items; S.cats = cats;
   S.lastBackup = await store.getMeta("lastBackup");
   S.noticeHiddenAt = await store.getMeta("noticeHiddenAt");
-}
-// Başlangıç verisine sonradan eklenen katalog fotoğraflarını, tarayıcıda zaten kayıtlı ürünlere taşır.
-// Yalnızca bu alanı hiç olmayan ürünlere dokunur; kullanıcının değiştirdiği ya da kaldırdığı
-// (boş bıraktığı) bağlantıya ve kendi fotoğraflarına dokunmaz.
-const CATALOG_VERSION = 1;
-async function addCatalogPhotos(items) {
-  if (!items.length || (await store.getMeta("catalogVersion")) >= CATALOG_VERSION) return;
-  try {
-    const seed = await (await fetch("data/seed.json", { cache: "no-store" })).json();
-    const fromSeed = new Map(seed.items.map(it => [it.id, it]));
-    for (const it of items) {
-      const s = fromSeed.get(it.id);
-      if (!s || !s.catalogPhoto || it.catalogPhoto !== undefined) continue;
-      Object.assign(it, { catalogPhoto: s.catalogPhoto, catalogNote: s.catalogNote || "", catalogPage: s.catalogPage || "", catalogSource: s.catalogSource || "" });
-      await store.putItem(it);
-    }
-    await store.setMeta("catalogVersion", CATALOG_VERSION);
-  } catch (e) { console.warn("Katalog fotoğrafları eklenemedi; sonraki açılışta yeniden denenecek", e); }
 }
 (async function boot() {
   try { await initCloud(); } catch (e) { viewNoConnection(e); return; }
