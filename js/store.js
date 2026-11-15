@@ -67,7 +67,10 @@ export const store = {
   }
 };
 
-// Fotoğrafı küçültür (en uzun kenar 1600 px, JPEG %85).
+// Fotoğrafı küçültür (en uzun kenar 1600 px).
+// Normal fotoğraflar JPEG %85 olarak saklanır. Arka planı şeffaf olanlar (PNG/WebP) JPEG'e
+// çevrilince şeffaf alan siyaha boyanıyordu; bunlar WebP (desteklenmezse PNG) olarak saklanır,
+// böylece arkada sitenin zemin rengi görünür.
 export async function shrinkImage(file, max = 1600) {
   const bmp = await createImageBitmap(file).catch(() => null);
   let w, h, src;
@@ -79,8 +82,22 @@ export async function shrinkImage(file, max = 1600) {
   const k = Math.min(1, max / Math.max(w, h));
   const c = document.createElement("canvas");
   c.width = Math.round(w * k); c.height = Math.round(h * k);
-  c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
-  return new Promise(res => c.toBlob(b => res(b), "image/jpeg", 0.85));
+  const ctx = c.getContext("2d");
+  ctx.drawImage(src, 0, 0, c.width, c.height);
+  const toBlob = (type, q) => new Promise(res => c.toBlob(b => res(b), type, q));
+  if (file.type !== "image/jpeg" && hasTransparency(ctx, c.width, c.height)) {
+    const webp = await toBlob("image/webp", 0.9);
+    return webp && webp.type === "image/webp" ? webp : toBlob("image/png");
+  }
+  return toBlob("image/jpeg", 0.85);
+}
+
+function hasTransparency(ctx, w, h) {
+  try {
+    const d = ctx.getImageData(0, 0, w, h).data;
+    for (let i = 3; i < d.length; i += 4) if (d[i] < 250) return true;
+  } catch (e) { /* okunamadıysa normal fotoğraf say */ }
+  return false;
 }
 
 export const blobToDataURL = b => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(b); });
