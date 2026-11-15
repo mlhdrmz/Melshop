@@ -1,0 +1,970 @@
+{
+ "version": 1,
+ "exportedAt": "2026-11-15T10:30:00Z",
+ "source": "Bakım Dolabı",
+ "items": [
+  {
+   "id": "ayak-kremi",
+   "name": "Ayak kremi (üreli)",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Topuk çatlakları için.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Babe Üreli Onarıcı Ayak Bakım Kremi 100 ml",
+     "price": "697,99 TL",
+     "url": "https://www.cimri.com/ayak-bakimi/en-ucuz-babe-ureli-100-ml-onarici-ayak-bakim-kremi-fiyatlari,28362771",
+     "hint": "Dermoevim"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "El & Ayak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:15Z",
+   "updatedAt": "2026-10-13T17:01:15Z"
+  },
+  {
+   "id": "bha-serum",
+   "name": "BHA veya niacinamide serum",
+   "brand": "",
+   "cat": "bakim",
+   "status": "wish",
+   "priority": "dusuk",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Siyah nokta ve gözenek için. The Purest Solutions / The Ordinary.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "The Ordinary Niacinamide 10% + Zinc 1% 30 ml",
+     "price": "437 TL",
+     "url": "https://www.cimri.com/anti-aging-yaslanma-karsiti/en-ucuz-the-ordinary-niacinamide-10-ve-zinc-1-30-ml-solusyon-fiyatlari,817210252",
+     "hint": "İldens Ticaret (PttAVM); Reçete'de 445 TL"
+    },
+    {
+     "label": "The Purest Solutions BHA %2 Tonik 200 ml",
+     "price": "525 TL",
+     "url": "https://www.cimri.com/cilt-temizleme-ve-peeling/en-ucuz-the-purest-solutions-200-ml-bha-2-siyah-nokta-hedefli-yaglanma-dengeleyici-tonik-fiyatlari,2348419123",
+     "hint": "Gratis, ücretsiz kargo"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Yüz & Dudak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:02:01Z",
+   "updatedAt": "2026-10-13T17:02:01Z"
+  },
+  {
+   "id": "body-trimmer",
+   "name": "Body trimmer / groomer",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "yuksek",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Öneri: Philips Bodygroom, Braun Body Groomer, Philips OneBlade.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Philips OneBlade QP2824/10 (yüz + vücut)",
+     "price": "1.619 TL",
+     "url": "https://www.cimri.com/tiras-makineleri/en-ucuz-philips-qp282410-oneblade-yuz-ve-vucut-sekilendirici-trras-makinesi-fiyatlari,2194927974",
+     "hint": "Hepsiburada"
+    },
+    {
+     "label": "Braun Bodygroomer 3 BG3350",
+     "price": "2.579 TL",
+     "url": "https://www.cimri.com/sac-kesme-makineleri/en-ucuz-braun-bodygroomer-3-bg3350-vucut-bakim-seti-fiyatlari,2096126949",
+     "hint": ""
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Hassas Bölge",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:05Z",
+   "updatedAt": "2026-10-13T17:01:05Z"
+  },
+  {
+   "id": "curaprox-5460",
+   "name": "CS 5460 Ultra Soft Diş Fırçası",
+   "brand": "Curaprox",
+   "cat": "bakim",
+   "status": "owned",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": 10,
+   "marketWhy": "Manuel diş fırçalarında referans ürün. Çok sayıda ince ve yumuşak kıl, diş etine zarar vermeden iyi temizler. Tek eksisi kılların görece hızlı yıpranması.",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [],
+   "offersCheckedAt": "",
+   "fields": {
+    "sub": "Ağız",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:00:06Z",
+   "updatedAt": "2026-10-13T17:00:06Z"
+  },
+  {
+   "id": "dil-temizleyici",
+   "name": "Dil temizleyici",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Tepe Tongue Cleaner Dil Temizleyici",
+     "price": "418,99 TL",
+     "url": "https://www.cimri.com/dis-ipleri/en-ucuz-tepe-tongue-cleaner-dil-temizleyici-fiyatlari,98921946",
+     "hint": "Dermoevim"
+    },
+    {
+     "label": "Curaprox CTC 203 Dil Temizleyici (2'li)",
+     "price": "523,98 TL",
+     "url": "https://www.cimri.com/dis-fircalari/en-ucuz-curaprox-ctc-203-dil-temizleyici-fiyatlari,2117514",
+     "hint": "vitamanya (PttAVM)"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Ağız",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:14Z",
+   "updatedAt": "2026-10-13T17:01:14Z"
+  },
+  {
+   "id": "dis-macunu",
+   "name": "Diş macunu",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "yuksek",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Öneri: Sensodyne veya Elmex.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Sensodyne Hassasiyet & Diş Eti 75 ml",
+     "price": "283 TL",
+     "url": "https://www.cimri.com/dis-macunlari/en-ucuz-sensodyne-hassasiyet-dis-eti-75-ml-dis-macunu-fiyatlari,312674044",
+     "hint": "+73 TL kargo; Amazon'da 329 TL kargosuz"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Ağız",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:06Z",
+   "updatedAt": "2026-10-13T17:01:06Z"
+  },
+  {
+   "id": "dus-jeli",
+   "name": "Duş jeli",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "yuksek",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Hafif kokulu ya da kokusuz.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Dove Deeply Nourishing Duş Jeli 500 ml",
+     "price": "399 TL",
+     "url": "https://www.cimri.com/dus-jelleri-ve-banyo-kopukleri/en-ucuz-dove-deeply-nourishing-500ml-dus-jeli-fiyatlari,121086333",
+     "hint": "Rossmann (Hepsiburada)"
+    },
+    {
+     "label": "Nivea Creme Care Duş Jeli 250 ml",
+     "price": "159,10 TL",
+     "url": "https://www.cimri.com/dus-jelleri-ve-banyo-kopukleri/en-ucuz-nivea-creme-care-250-ml-dus-jeli-fiyatlari,14470176",
+     "hint": "uygunaall (idefix)"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Vücut",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:03Z",
+   "updatedAt": "2026-10-13T17:01:03Z"
+  },
+  {
+   "id": "gargara",
+   "name": "Ağız gargarası",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Listerine Cool Mint Ağız Bakım Suyu 500 ml",
+     "price": "253,46 TL",
+     "url": "https://www.cimri.com/agiz-gargara-ve-spreyi/en-ucuz-listerine-500-ml-cool-mint-agiz-bakim-suyu-fiyatlari,623235774",
+     "hint": "Pazarama Plus; Rossmann 279 TL. 159,90 TL'lik ilan şüpheli düşük olduğu için alınmadı"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Ağız",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:13Z",
+   "updatedAt": "2026-10-13T17:01:13Z"
+  },
+  {
+   "id": "gunes-kremi",
+   "name": "Güneş kremi SPF 50",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "yuksek",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Öneri: La Roche-Posay Anthelios. Bioderma Photoderm şu an stokta görünmüyor.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "La Roche-Posay Anthelios UVMune 400 Invisible Fluid SPF50+ 50 ml",
+     "price": "399 TL",
+     "url": "https://www.cimri.com/gunes-kremleri-ve-losyonlari/en-ucuz-la-roche-posay-anthelios-uvmune-400-spf50-50-ml-gunes-kremi-fiyatlari,1325653531",
+     "hint": ""
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Yüz & Dudak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:02Z",
+   "updatedAt": "2026-10-13T17:01:02Z"
+  },
+  {
+   "id": "hassas-bolge-jeli",
+   "name": "Hassas bölge yıkama jeli",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "yuksek",
+   "paid": null,
+   "boughtAt": "",
+   "note": "pH dengeli, parfümsüz.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Sebamed pH 3.8 İntim Yıkama Jeli 200 ml",
+     "price": "281,91 TL",
+     "url": "https://www.cimri.com/genital-bolge-temizligi/en-ucuz-sebamed-ph-3-8-hassas-200-ml-intim-yikama-fiyatlari,871216599",
+     "hint": "bebekbeziburada; Kırmızıbeyazz 289 TL"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Hassas Bölge",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:04Z",
+   "updatedAt": "2026-10-13T17:01:04Z"
+  },
+  {
+   "id": "hs-mentollu",
+   "name": "Mentollü Şampuan",
+   "brand": "Head & Shoulders",
+   "cat": "bakim",
+   "status": "owned",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": 7,
+   "marketWhy": "Çinko pirition ile kepeğe karşı etkili ve kanıtlanmış bir formül. Zirvede ketokonazollü şampuanlar (ör. Nizoral) var; inatçı kepekte onlar daha güçlü.",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [],
+   "offersCheckedAt": "",
+   "fields": {
+    "sub": "Saç",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:00:03Z",
+   "updatedAt": "2026-10-13T17:00:03Z"
+  },
+  {
+   "id": "ikinci-parfum",
+   "name": "Akşam / kış parfümü",
+   "brand": "",
+   "cat": "bakim",
+   "status": "wish",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Sıcak/odunsu. Bütçe: Armaf CDNI, Lattafa, Banderas The Icon. Üst: Sauvage, Bleu de Chanel, YSL Y.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Antonio Banderas The Icon EDT 100 ml",
+     "price": "1.019 TL",
+     "url": "https://www.cimri.com/erkek-parfumleri/en-ucuz-antonio-banderas-the-icon-edt-100-ml-erkek-parfum-fiyatlari,749298642",
+     "hint": ""
+    },
+    {
+     "label": "Armaf Club de Nuit Intense EDT 105 ml",
+     "price": "1.989 TL",
+     "url": "https://www.cimri.com/erkek-parfumleri/en-ucuz-armaf-club-de-nuit-intense-edt-105-ml-erkek-parfumu-fiyatlari,95375015",
+     "hint": ""
+    },
+    {
+     "label": "Dior Sauvage EDT 100 ml",
+     "price": "",
+     "url": "https://www.cimri.com/erkek-parfumleri/en-ucuz-christian-dior-sauvage-edt-100-ml-erkek-parfum-fiyatlari,954979231",
+     "hint": "çok ucuz ilanlar sahte olabilir, yetkili satıcıdan al"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Parfüm",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:02:00Z",
+   "updatedAt": "2026-10-13T17:02:00Z"
+  },
+  {
+   "id": "monamour-dudak",
+   "name": "Orange Dudak Koruyucu",
+   "brand": "Mon Amour",
+   "cat": "bakim",
+   "status": "owned",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": 5,
+   "marketWhy": "Formülünü tam bilmiyorum; aromalı dudak koruyucular genelde bakım değil his için tasarlanır ve aroma çatlamış dudağı tahriş edebilir. Zirvede kokusuz onarıcılar var (ör. Bepanthol, Aquaphor).",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [],
+   "offersCheckedAt": "",
+   "fields": {
+    "sub": "Yüz & Dudak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:00:02Z",
+   "updatedAt": "2026-10-13T17:00:02Z"
+  },
+  {
+   "id": "nautica-voyage",
+   "name": "Nautica Voyage",
+   "brand": "Nautica",
+   "cat": "bakim",
+   "status": "owned",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Gündüz / ferah koku.",
+   "marketScore": 5,
+   "marketWhy": "Fiyatına göre çok iyi, ferah ve sevilen bir koku. Ama kalıcılığı ve yayılımı zayıf (genelde 2–4 saat), notaları basit. Kalite olarak orta; fiyat/performans olarak güçlü.",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [],
+   "offersCheckedAt": "",
+   "fields": {
+    "sub": "Parfüm",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:00:09Z",
+   "updatedAt": "2026-10-13T17:00:09Z"
+  },
+  {
+   "id": "nivea-creme",
+   "name": "Nivea Creme",
+   "brand": "Nivea",
+   "cat": "bakim",
+   "status": "owned",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "El, topuk ve dirsek için. Yüze ağır gelir.",
+   "marketScore": 7,
+   "marketWhy": "Çok yönlü, koruyucu ve ucuz bir klasik. El kremi olarak en iyiler (ör. Neutrogena Norveç Formülü, O'Keeffe's) daha hızlı emilir ve kuru ele daha etkili; Nivea ağır ve parfümlü.",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [],
+   "offersCheckedAt": "",
+   "fields": {
+    "sub": "El & Ayak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:00:04Z",
+   "updatedAt": "2026-10-13T17:00:04Z"
+  },
+  {
+   "id": "pudra-antichafe",
+   "name": "Pudra / anti-chafe",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Sürtünme ve pişik için, talksız tercih et.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Dalin Likit Pudra 100 ml (talksız)",
+     "price": "149 TL",
+     "url": "https://www.cimri.com/bebek-pudra/en-ucuz-dalin-100-ml-likit-pudra-fiyatlari,895215794",
+     "hint": "Watsons, kargo ayrı"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Vücut",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:09Z",
+   "updatedAt": "2026-10-13T17:01:09Z"
+  },
+  {
+   "id": "rexona-clinical",
+   "name": "Men Clinical Protection 96s Active Fresh",
+   "brand": "Rexona",
+   "cat": "bakim",
+   "status": "owned",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Akşam yatmadan, kuru cilde.",
+   "marketScore": 8,
+   "marketWhy": "Marketlerde bulunan en güçlü antiperspirantlardan. Üstünde sadece eczane tipi, daha yüksek alüminyum klorürlü ürünler (ör. Perspirex) var; onlar da cildi daha çok tahriş edebilir.",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [],
+   "offersCheckedAt": "",
+   "fields": {
+    "sub": "Koltukaltı",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:00:08Z",
+   "updatedAt": "2026-10-13T17:00:08Z"
+  },
+  {
+   "id": "sac-kremi",
+   "name": "Saç kremi",
+   "brand": "",
+   "cat": "bakim",
+   "status": "wish",
+   "priority": "dusuk",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Elidor Brezilya Keratin Terapisi Bakım Kremi 350 ml",
+     "price": "239 TL",
+     "url": "https://www.cimri.com/sampuan-ve-sac-kremi/en-ucuz-elidor-brezilya-keratin-terapisi-350-ml-serum-bakim-kremi-fiyatlari,2223575298",
+     "hint": "Rossmann; Amazon/Hepsiburada'da 139,90 TL ilan da var"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Saç",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:02:02Z",
+   "updatedAt": "2026-10-13T17:02:02Z"
+  },
+  {
+   "id": "sac-sekillendirici",
+   "name": "Saç şekillendirici",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Wax, clay veya krem.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Totex Clay Wax 150 ml",
+     "price": "249,99 TL",
+     "url": "https://www.cimri.com/wax/en-ucuz-totex-clay-150-ml-sac-sekillendirici-wax-fiyatlari,332403263",
+     "hint": "Hepsiburada"
+    },
+    {
+     "label": "Osmo Clay Mat Wax 100 ml",
+     "price": "1.500 TL",
+     "url": "https://www.cimri.com/wax/en-ucuz-osmo-clay-100-ml-mat-gorunumlu-kil-bazli-sert-wax-fiyatlari,6025962",
+     "hint": "glowoasis (Pazarama), ücretsiz kargo"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Saç",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:12Z",
+   "updatedAt": "2026-10-13T17:01:12Z"
+  },
+  {
+   "id": "sensodyne-floss",
+   "name": "Gentle Diş İpi 30 m",
+   "brand": "Sensodyne",
+   "cat": "bakim",
+   "status": "owned",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": 7,
+   "marketWhy": "Hassas diş etleri için yumuşak ve iyi bir diş ipi. Zirvedeki PTFE ipler (ör. Oral-B Glide Pro-Health) sıkı dişlerin arasından daha kolay kayar ve daha az tiftiklenir.",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [],
+   "offersCheckedAt": "",
+   "fields": {
+    "sub": "Ağız",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:00:07Z",
+   "updatedAt": "2026-10-13T17:00:07Z"
+  },
+  {
+   "id": "tiras-jeli",
+   "name": "Tıraş jeli / köpüğü",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Hassas cilt versiyonu.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Nivea Men Hassas Tıraş Jeli 200 ml",
+     "price": "229,90 TL",
+     "url": "https://www.cimri.com/tiras-jelleri-kopukleri-kremleri/en-ucuz-nivea-men-200-ml-hassas-tras-jeli-fiyatlari,62056850",
+     "hint": "Watsons, kargo 74,90 TL"
+    },
+    {
+     "label": "Gillette Hassas Tıraş Köpüğü 200 ml",
+     "price": "125 TL",
+     "url": "https://www.cimri.com/tiras-jelleri-kopukleri-kremleri/en-ucuz-gillette-hassas-200-ml-tiras-kopugu-fiyatlari,46183159",
+     "hint": "Rossmann"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Tıraş & Sakal",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:10Z",
+   "updatedAt": "2026-10-13T17:01:10Z"
+  },
+  {
+   "id": "tiras-sonrasi",
+   "name": "Tıraş sonrası balm",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Alkolsüz. Öneri: Nivea Men Sensitive.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Nivea Men Sensitive Tıraş Sonrası Balsam 100 ml",
+     "price": "309 TL",
+     "url": "https://www.cimri.com/tiras-sonrasi-bakim/en-ucuz-nivea-for-men-sensitive-hassas-ciltler-icin-100-ml-after-shave-balsam-fiyatlari,506822",
+     "hint": "Watsons"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Tıraş & Sakal",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:11Z",
+   "updatedAt": "2026-10-13T17:01:11Z"
+  },
+  {
+   "id": "tirnak-makasi",
+   "name": "Tırnak makası (Solingen paslanmaz, mavi)",
+   "brand": "Solingen",
+   "cat": "bakim",
+   "status": "owned",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": 7,
+   "marketWhy": "Solingen, Almanya'nın bıçak ve makas şehri; gerçek Solingen üretimi paslanmaz çelik makaslar kaliteli, keskin ve uzun ömürlüdür. Ancak \"Solingen\" yazan ucuz taklitler de çok yaygın. Zirvede Zwilling, Dovo gibi bilinen Solingen markaları ve Japon Seki Edge var. Makas temiz ve tek seferde kesiyorsa iyi bir tanesine denk gelmişsin.",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [],
+   "offersCheckedAt": "",
+   "fields": {
+    "sub": "El & Ayak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:00:05Z",
+   "updatedAt": "2026-10-13T17:00:05Z"
+  },
+  {
+   "id": "tirnak-torpusu",
+   "name": "Tırnak törpüsü",
+   "brand": "",
+   "cat": "bakim",
+   "status": "wish",
+   "priority": "dusuk",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Promani Cam Törpü",
+     "price": "224,75 TL",
+     "url": "https://www.cimri.com/tirnak-torpusu/en-ucuz-promani-cam-torpu-fiyatlari,294769317",
+     "hint": "n11"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "El & Ayak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:02:04Z",
+   "updatedAt": "2026-10-13T17:02:04Z"
+  },
+  {
+   "id": "vucut-havlusu",
+   "name": "Vücut havlusu (mavi)",
+   "brand": "",
+   "cat": "bakim",
+   "status": "owned",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "",
+   "marketScore": null,
+   "marketWhy": "Kumaşı ve gramajı bilmeden puanlayamıyorum. İyi bir vücut havlusu genelde %100 pamuk (ör. Türk pamuğu) ve 500–700 g/m² olur; etiketini yazarsan puanlarım.",
+   "rating": 5,
+   "scores": {},
+   "again": null,
+   "offers": [],
+   "offersCheckedAt": "",
+   "fields": {
+    "sub": "Vücut",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:00:10Z",
+   "updatedAt": "2026-10-13T17:00:10Z"
+  },
+  {
+   "id": "vucut-losyonu",
+   "name": "Vücut losyonu",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Öneri: Nivea, CeraVe, Eucerin.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "CeraVe Moisturising Lotion 236 ml",
+     "price": "503,10 TL",
+     "url": "https://www.cimri.com/vucut-losyonu-ve-nemlendiricileri/en-ucuz-cerave-236-ml-moisturising-lotion-nemlendirici-losyon-fiyatlari,104208703",
+     "hint": "Markalar Store34 (PttAVM)"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Vücut",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:08Z",
+   "updatedAt": "2026-10-13T17:01:08Z"
+  },
+  {
+   "id": "vucut-peelingi",
+   "name": "Vücut peelingi / kese",
+   "brand": "",
+   "cat": "bakim",
+   "status": "wish",
+   "priority": "dusuk",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Haftada 1.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Kelebek Harem Kalın Doğal Sırt Kesesi",
+     "price": "369,90 TL",
+     "url": "https://www.cimri.com/banyo-bakim-aksesuarlari/en-ucuz-kelebek-harem-kalin-dogal-sirt-kesesi-fiyatlari,178447828",
+     "hint": "Watsons, kargo 74,90 TL"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Vücut",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:02:03Z",
+   "updatedAt": "2026-10-13T17:02:03Z"
+  },
+  {
+   "id": "yuz-havlusu",
+   "name": "Yüz havlusu (küçük, ayrı)",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "orta",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Sık değiştir.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Bedinn Lekton Organik El Havlusu",
+     "price": "191,90 TL",
+     "url": "https://www.cimri.com/el-yuz-havlusu/en-ucuz-bedinn-lekton-organik-el-havlusu-fiyatlari,1828595",
+     "hint": "Hepsiburada; boyut belirtilmemiş"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Yüz & Dudak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:07Z",
+   "updatedAt": "2026-10-13T17:01:07Z"
+  },
+  {
+   "id": "yuz-nemlendirici",
+   "name": "Yüz nemlendiricisi",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "yuksek",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Öneri: CeraVe nemlendirici losyon, Neutrogena Hydro Boost, La Roche-Posay Toleriane.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "Neutrogena Hydro Boost Water Gel 50 ml",
+     "price": "230 TL",
+     "url": "https://www.cimri.com/nemlendiriciler/en-ucuz-neutrogena-hydro-boost-50-ml-normal-cilt-water-gel-nemlendirici-krem-fiyatlari,33978764",
+     "hint": "Watsons, +75 TL kargo"
+    },
+    {
+     "label": "CeraVe Nemlendirici Losyon 88 ml",
+     "price": "348 TL",
+     "url": "https://www.cimri.com/vucut-losyonu-ve-nemlendiricileri/en-ucuz-cerave-88-ml-moisturising-lotion-nemlendirici-losyon-fiyatlari,104208198",
+     "hint": ""
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Yüz & Dudak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:01Z",
+   "updatedAt": "2026-10-13T17:01:01Z"
+  },
+  {
+   "id": "yuz-temizleyici",
+   "name": "Yüz temizleyici",
+   "brand": "",
+   "cat": "bakim",
+   "status": "missing",
+   "priority": "yuksek",
+   "paid": null,
+   "boughtAt": "",
+   "note": "Öneri: CeraVe Foaming (yağlı/karma), CeraVe Hydrating (kuru), La Roche-Posay Effaclar Jel.",
+   "marketScore": null,
+   "marketWhy": "",
+   "rating": null,
+   "scores": {},
+   "again": null,
+   "offers": [
+    {
+     "label": "CeraVe Köpüren Temizleyici 236 ml (yağlı/karma)",
+     "price": "599 TL",
+     "url": "https://www.cimri.com/cilt-temizleme-ve-peeling/en-ucuz-cerave-236-ml-yagli-ciltler-icin-seramid-icerikli-kopuren-temizleyici-fiyatlari,740025545",
+     "hint": ""
+    },
+    {
+     "label": "CeraVe Nemlendiren Temizleyici 236 ml (kuru)",
+     "price": "533 TL",
+     "url": "https://www.cimri.com/vucut-losyonu-ve-nemlendiricileri/en-ucuz-cerave-236-ml-hydrating-cleanser-nemlendiren-temizleyici-fiyatlari,104208200",
+     "hint": ""
+    },
+    {
+     "label": "La Roche-Posay Effaclar Jel 400 ml",
+     "price": "347 TL",
+     "url": "https://www.cimri.com/cilt-temizleme-ve-peeling/en-ucuz-la-roche-posay-effaclar-yagli-ve-akneye-egilimli-ciltler-icin-400-ml-temizleme-jeli-fiyatlari,1034342581",
+     "hint": "bu fiyat küçük satıcıda, sonraki ilan ~360 TL"
+    }
+   ],
+   "offersCheckedAt": "2026-10-13",
+   "fields": {
+    "sub": "Yüz & Dudak",
+    "rebuy": false
+   },
+   "photos": [],
+   "createdAt": "2026-10-13T17:01:00Z",
+   "updatedAt": "2026-10-13T17:01:00Z"
+  }
+ ]
+}
